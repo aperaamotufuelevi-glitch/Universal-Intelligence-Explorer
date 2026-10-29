@@ -1,0 +1,1613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Intelligence Explorer</title>
+<style>
+:root{
+  --bg:#f4f6f9;--panel:#ffffff;--panel2:#f8fafc;--ink:#14202e;--muted:#5b6b7d;--line:#dbe3ec;
+  --brand:#0f5c8c;--brand2:#0b4a72;--accent:#14866d;--warn:#b26a00;--bad:#b42318;--crit:#7a0916;
+  --ok:#137a3a;--chip:#eef3f8;--shadow:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e141b;--panel:#16202b;--panel2:#1b2733;--ink:#e6edf3;--muted:#9fb0c2;--line:#2a3846;
+  --brand:#4aa3df;--brand2:#7cc0ef;--accent:#3fbf9f;--warn:#f0a33a;--bad:#ff6b5e;--crit:#ff8fa0;--ok:#4ccf7a;--chip:#22303e;
+  --shadow:none;}}
+:root[data-theme="dark"]{
+  --bg:#0e141b;--panel:#16202b;--panel2:#1b2733;--ink:#e6edf3;--muted:#9fb0c2;--line:#2a3846;
+  --brand:#4aa3df;--brand2:#7cc0ef;--accent:#3fbf9f;--warn:#f0a33a;--bad:#ff6b5e;--crit:#ff8fa0;--ok:#4ccf7a;--chip:#22303e;--shadow:none;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+a{color:var(--brand)}
+header.top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topin{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.logo .mk{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;display:grid;place-items:center;font-size:14px;letter-spacing:.5px}
+.logo small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+nav.tabs button{border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}
+nav.tabs button.on{background:var(--chip);color:var(--ink)}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:17px}.card h3{margin:14px 0 6px;font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 180px}
+label.f{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=password],input[type=url],input[type=email],input[type=number],select,textarea{
+  width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--ink);font:inherit}
+textarea{min-height:96px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:var(--brand)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{background:var(--brand2)}
+.btn.sm{padding:5px 9px;font-size:13px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.muted{color:var(--muted)}.small{font-size:13px}.mono{font-family:var(--mono);font-size:13px}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:14px;text-align:center;color:var(--muted);cursor:pointer;background:var(--panel2)}
+.drop.over{border-color:var(--brand);color:var(--ink)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumb{position:relative;width:96px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel2);font-size:11px}
+.thumb img{width:96px;height:72px;object-fit:cover;display:block}
+.thumb .cap{padding:2px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb .x{position:absolute;top:2px;right:2px;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;width:20px;height:20px;cursor:pointer;line-height:20px;padding:0}
+.thumb.err{border-color:var(--bad)}.thumb.err .cap{color:var(--bad)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--chip);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
+.badge{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11.5px;font-weight:700;letter-spacing:.2px;vertical-align:middle}
+.b-live{background:#dff3ea;color:#0b6a45}.b-local{background:#e3ecfb;color:#1d4f9a}.b-web{background:#efe6fb;color:#5b2aa0}.b-ai{background:#fbefe0;color:#8a4b00}.b-inf{background:#f3f0e6;color:#6b5d1f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .b-live{background:#123b2b;color:#7fe0b2}:root:not([data-theme="light"]) .b-local{background:#16294a;color:#9cc0ff}:root:not([data-theme="light"]) .b-web{background:#2c1b47;color:#cfb0ff}:root:not([data-theme="light"]) .b-ai{background:#3d2a10;color:#ffc77a}:root:not([data-theme="light"]) .b-inf{background:#34301c;color:#e5d48a}}
+.risk{display:inline-block;padding:3px 10px;border-radius:7px;font-weight:800;font-size:12.5px;color:#fff}
+.r-Critical{background:var(--crit)}.r-High{background:var(--bad)}.r-Moderate{background:var(--warn)}.r-Low{background:var(--ok)}.r-Unknown{background:#64748b}.r-NA{background:#94a3b8}
+.conf{font-weight:700}
+.steps{list-style:none;margin:0;padding:0;font-size:13.5px}
+.steps li{display:flex;gap:8px;align-items:flex-start;padding:4px 0;border-bottom:1px dashed var(--line)}
+.steps li:last-child{border-bottom:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:0 0 10px;background:#94a3b8}
+.dot.run{background:var(--brand);animation:pulse 1s infinite}.dot.ok{background:var(--ok)}.dot.fail{background:var(--bad)}.dot.skip{background:#cbd5e1}
+@keyframes pulse{50%{opacity:.35}}
+.emerg{border:2px solid var(--crit);background:#fde8eb;color:#5c0612;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.emerg h2{margin:0 0 6px;color:#7a0916}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .emerg{background:#3a0d14;color:#ffd6dc}:root:not([data-theme="light"]) .emerg h2{color:#ffb3bf}}
+details.sec{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--panel)}
+details.sec>summary{cursor:pointer;padding:10px 12px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px}
+details.sec>summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+details.sec[open]>summary::before{transform:rotate(90deg)}
+details.sec>.in{padding:0 14px 12px}
+.item{border-left:4px solid var(--brand);padding-left:12px;margin:14px 0}
+.kv{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:3px 14px;font-size:14px}
+.kv dt{color:var(--muted);font-weight:600}.kv dd{margin:0;word-break:break-word}
+.cite{font-size:11px;font-weight:700;vertical-align:super;text-decoration:none;margin-left:1px}
+ul.tight{margin:4px 0 4px 18px;padding:0}ul.tight li{margin:2px 0}
+.srclist li{margin:6px 0;font-size:13.5px}
+.refimgs{display:flex;gap:12px;flex-wrap:wrap}
+figure.ref{margin:0;max-width:240px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+figure.ref img{display:block;width:100%;max-height:200px;object-fit:contain;background:#fff}
+figure.ref figcaption{font-size:11.5px;padding:6px;color:#333;background:#f7f7f7}
+.thread .msg{padding:10px 12px;border-radius:10px;margin:8px 0;max-width:92%}
+.thread .u{background:var(--chip);margin-left:auto}
+.thread .a{background:var(--panel2);border:1px solid var(--line)}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+table.t th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.pt{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:3px;overflow-x:auto;min-width:760px}
+.ptwrap{overflow-x:auto;padding-bottom:6px}
+.el{border:1px solid var(--line);border-radius:5px;padding:3px 2px;text-align:center;cursor:pointer;background:var(--panel2);min-height:46px;font-size:10px;line-height:1.15}
+.el b{display:block;font-size:14px}
+.el{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.el:hover{outline:2px solid var(--brand)}
+.el.dim{opacity:.25}
+.c-alkali{background:#ffd9d2}.c-alkaline{background:#ffe9c7}.c-tm{background:#f6e7b1}.c-post{background:#d8ecd0}.c-metalloid{background:#cfe8e6}
+.c-nonmetal{background:#d6e6ff}.c-halogen{background:#e3dcfb}.c-noble{background:#f3d7f0}.c-lan{background:#fde0ec}.c-act{background:#f6d6d6}.c-unk{background:#e5e7eb}
+.el[class*=c-]{color:#111}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#14202e;color:#fff;padding:10px 16px;border-radius:9px;z-index:99;display:none;max-width:90vw}
+.switch{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+.okc{color:var(--ok);font-weight:700}.badc{color:var(--bad);font-weight:700}.warnc{color:var(--warn);font-weight:700}
+.guide h3{margin-top:18px}.guide pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;font-size:12.5px}
+.hide{display:none!important}
+@media (max-width:640px){main{padding:10px}.card{padding:12px}nav.tabs{margin-left:0;width:100%;overflow-x:auto;flex-wrap:nowrap}.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}}
+@media print{header.top,#inputCard,#stepsCard,.noprint,#followCard{display:none!important}body{background:#fff}.card{box-shadow:none}details.sec{break-inside:avoid}details.sec>.in{display:block}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin">
+  <div class="logo"><div class="mk">UIX</div><div>Universal Intelligence Explorer<small>Identify · Understand · Assess — evidence first</small></div></div>
+  <nav class="tabs" id="tabs">
+    <button data-v="explore" class="on">Explore</button>
+    <button data-v="ptable">Periodic Table</button>
+    <button data-v="history">History</button>
+    <button data-v="tests">Self-Tests</button>
+    <button data-v="settings">Settings</button>
+    <button data-v="guide">Guide</button>
+  </nav>
+</div></header>
+<main>
+
+<!-- ============ EXPLORE ============ -->
+<section class="view on" id="v-explore">
+  <div class="card" id="inputCard">
+    <h2>What do you want to identify or understand?</h2>
+    <textarea id="q" maxlength="6000" placeholder="Examples: Fe · H2O · H2 + O2 · 7647-14-5 · COVID-19 · water, ethanol, and sodium chloride — can they interact? · What does 'tachycardia' mean? · What is in this product and is it hazardous? (attach a photo)"></textarea>
+    <div class="row" style="margin-top:10px">
+      <div><label class="f" for="cat">Category</label><select id="cat"></select></div>
+      <div><label class="f" for="detail">Report detail</label><select id="detail"><option value="concise">Concise</option><option value="standard" selected>Standard</option><option value="detailed">Detailed</option></select></div>
+      <div><label class="f" for="focus">Questions to cover</label><select id="focus"><option value="all" selected>Everything applicable</option><option value="identity">Identity only</option><option value="safety">Hazards &amp; safety focus</option><option value="interactions">Interactions focus</option><option value="evidence">Research evidence focus</option></select></div>
+    </div>
+    <div class="drop" id="drop" style="margin-top:10px" tabindex="0" role="button" aria-label="Add photos">
+      <b>Add photos</b> — tap to choose or drag images here (JPEG, PNG, WebP, GIF; up to 6). Labels, objects, organisms, specimens, documents, screenshots.
+      <input type="file" id="file" accept="image/*" multiple class="hide">
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="row" style="margin-top:12px;align-items:center">
+      <div style="flex:0 0 auto"><button class="btn pri" id="go">Analyze</button></div>
+      <div style="flex:0 0 auto"><button class="btn" id="clearBtn">Clear</button></div>
+      <div class="small muted" id="modeNote" style="flex:1 1 260px"></div>
+    </div>
+  </div>
+  <div id="emergBox"></div>
+  <div class="card hide" id="stepsCard"><h2>Analysis pipeline</h2><ul class="steps" id="steps"></ul></div>
+  <div id="report"></div>
+  <div class="card hide" id="followCard">
+    <h2>Follow-up questions</h2>
+    <div class="thread" id="thread"></div>
+    <div class="row"><div style="flex:1 1 400px"><textarea id="fq" style="min-height:60px" maxlength="3000" placeholder="Ask about this analysis — e.g. 'Which of these is most dangerous to store together?' or 'Explain the second candidate in more detail.'"></textarea></div>
+    <div style="flex:0 0 auto"><button class="btn pri" id="fgo">Ask</button></div></div>
+  </div>
+</section>
+
+<!-- ============ PERIODIC TABLE ============ -->
+<section class="view" id="v-ptable">
+  <div class="card">
+    <h2>Periodic Table — 118 elements</h2>
+    <div class="row"><div><label class="f" for="ptSearch">Search (name, symbol, or atomic number)</label><input type="text" id="ptSearch" placeholder="e.g. iron, Fe, 26"></div>
+    <div><label class="f" for="ptCat">Highlight</label><select id="ptCat"><option value="">All categories</option></select></div>
+    <div style="flex:0 0 auto"><button class="btn" id="ptLive">Load live PubChem data</button></div></div>
+    <p class="small muted" id="ptStatus">Core data (number, symbol, name, standard atomic weight, group, period, class) is stored in this file. Tap “Load live PubChem data” to add electron configuration, density, melting/boiling points and more from PubChem.</p>
+    <div class="ptwrap"><div class="pt" id="pt"></div></div>
+  </div>
+  <div class="card hide" id="elCard"></div>
+</section>
+
+<!-- ============ HISTORY ============ -->
+<section class="view" id="v-history">
+  <div class="card"><h2>Analysis history</h2>
+    <div class="row"><div><input type="text" id="hSearch" placeholder="Search history"></div><div style="flex:0 0 auto"><button class="btn" id="hClear">Delete all history</button></div></div>
+    <p class="small muted" id="hNote"></p>
+    <div id="hList"></div>
+  </div>
+</section>
+
+<!-- ============ TESTS ============ -->
+<section class="view" id="v-tests">
+  <div class="card"><h2>Self-Tests (acceptance criteria)</h2>
+    <p class="small muted">These run the real pipeline against the live sources. Nothing here is simulated except Test 10, which deliberately points one connector at a dead address to prove the app reports failure honestly. Tests marked “AI” need your Anthropic API key in Settings.</p>
+    <div class="row">
+      <div><label class="f" for="t5img">Test 5 photo — a clear, labeled product</label><input type="file" id="t5img" accept="image/*"></div>
+      <div><label class="f" for="t6img">Test 6 photo — an unidentified powder</label><input type="file" id="t6img" accept="image/*"></div>
+    </div>
+    <div class="row" style="margin-top:10px"><div style="flex:0 0 auto"><button class="btn pri" id="runTests">Run all tests</button></div><div style="flex:0 0 auto"><button class="btn" id="runOffline">Run tests that need no API key</button></div><div class="small muted" id="testSummary"></div></div>
+  </div>
+  <div class="card"><table class="t"><thead><tr><th>#</th><th>Test</th><th>Result</th><th>Details</th></tr></thead><tbody id="testRows"></tbody></table></div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section class="view" id="v-settings">
+  <div class="card"><h2>AI service</h2>
+    <div class="row">
+      <div><label class="f" for="s_mode">Connection mode</label><select id="s_mode"><option value="direct">Direct — key kept in this browser only</option><option value="proxy">Proxy — key kept on my own server</option></select></div>
+      <div><label class="f" for="s_model">Model</label><select id="s_model"><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (recommended)</option><option value="claude-opus-5-5">Claude Opus 5.5 (deepest, slower)</option><option value="claude-haiku-5-5">Claude Haiku 5.5 (fastest)</option></select></div>
+      <div><label class="f" for="s_tokens">Max report length</label><select id="s_tokens"><option value="6000">Short (6k tokens)</option><option value="12000" selected>Standard (12k)</option><option value="20000">Long (20k)</option></select></div>
+    </div>
+    <div class="row" style="margin-top:10px" id="keyRow">
+      <div style="flex:2 1 320px"><label class="f" for="s_key">Anthropic API key (the same key your other tools use)</label><input type="password" id="s_key" autocomplete="off" placeholder="sk-ant-..."></div>
+      <div style="flex:1 1 220px"><label class="f" for="s_wsid">Workspace ID (only if your key isn't tied to a workspace)</label><input type="text" id="s_wsid" autocomplete="off" placeholder="wrkspc_..."></div>
+      <div style="flex:0 0 auto"><button class="btn" id="keyShow">Show</button></div>
+      <div style="flex:0 0 auto"><button class="btn" id="keyTest">Test AI connection</button></div>
+    </div>
+    <div class="row hide" style="margin-top:10px" id="proxyRow">
+      <div style="flex:2 1 320px"><label class="f" for="s_proxy">Proxy URL (see Guide → Server-side key)</label><input type="url" id="s_proxy" placeholder="https://uix-proxy.yourname.workers.dev"></div>
+      <div style="flex:0 0 auto"><button class="btn" id="proxyTest">Test proxy</button></div>
+    </div>
+    <p class="small muted" id="aiStatus"></p>
+  </div>
+  <div class="card"><h2>Live web research (CDC, WHO, NIH, ECHA, NIST, EPA…)</h2>
+    <div class="row">
+      <div><label class="f" for="s_web">Web research</label><select id="s_web"><option value="on" selected>On — search authoritative sites when useful</option><option value="off">Off</option></select></div>
+      <div><label class="f" for="s_webver">Web search tool version</label><select id="s_webver"><option value="web_search_20250305" selected>web_search_20250305</option><option value="web_search_20260209">web_search_20260209</option></select></div>
+      <div><label class="f" for="s_webmax">Searches per analysis</label><select id="s_webmax"><option>3</option><option selected>5</option><option>8</option></select></div>
+    </div>
+  </div>
+  <div class="card"><h2>Data connectors</h2>
+    <p class="small muted">Turn sources on or off and test each one. A failed test means that source will be reported as unavailable in reports — never replaced with made-up results.</p>
+    <table class="t"><thead><tr><th>Source</th><th>Covers</th><th>On</th><th>Test</th><th>Last test</th></tr></thead><tbody id="connRows"></tbody></table>
+    <div class="row" style="margin-top:10px">
+      <div><label class="f" for="s_ncbikey">NCBI API key (optional — raises PubMed limits)</label><input type="password" id="s_ncbikey" autocomplete="off"></div>
+      <div><label class="f" for="s_ncbimail">Contact email sent to NCBI (requested by NCBI)</label><input type="email" id="s_ncbimail"></div>
+      <div><label class="f" for="s_epakey">EPA CompTox API key (free, by request)</label><input type="password" id="s_epakey" autocomplete="off"></div>
+    </div>
+    <div class="row" style="margin-top:10px"><div style="flex:0 0 auto"><button class="btn" id="testAllConn">Test all connectors</button></div></div>
+  </div>
+  <div class="card"><h2>Behavior &amp; privacy</h2>
+    <div class="row">
+      <div><label class="f" for="s_timeout">Source timeout</label><select id="s_timeout"><option value="8000">8 seconds</option><option value="15000" selected>15 seconds</option><option value="30000">30 seconds</option></select></div>
+      <div><label class="f" for="s_rate">Analysis rate limit</label><select id="s_rate"><option value="10">10 per hour</option><option value="30" selected>30 per hour</option><option value="100">100 per hour</option></select></div>
+      <div><label class="f" for="s_cache">Cache source records</label><select id="s_cache"><option value="0">Never</option><option value="6" selected>6 hours</option><option value="24">24 hours</option><option value="168">7 days</option></select></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label class="f" for="s_hist">Keep analysis history</label><select id="s_hist"><option value="off">Off — don't save</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="forever">Until I delete it</option></select></div>
+      <div><label class="f" for="s_himg">Save photos in history</label><select id="s_himg"><option value="no" selected>No — text report only</option><option value="yes">Yes (uses more storage)</option></select></div>
+      <div><label class="f" for="s_defcat">Default category</label><select id="s_defcat"></select></div>
+      <div><label class="f" for="s_theme">Theme</label><select id="s_theme"><option value="auto">Match device</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+    </div>
+    <div class="row" style="margin-top:12px"><div style="flex:0 0 auto"><button class="btn pri" id="saveSettings">Save settings</button></div><div style="flex:0 0 auto"><button class="btn" id="clearCache">Clear cached records</button></div><div class="small muted" id="saveNote"></div></div>
+  </div>
+</section>
+
+<!-- ============ GUIDE ============ -->
+<section class="view guide" id="v-guide"><div class="card" id="guideBody"></div></section>
+
+</main>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* =====================================================================
+   UIX — Universal Intelligence Explorer  (single-file build)
+   Part 1: utilities, settings, storage, periodic table, chemistry engine
+   ===================================================================== */
+const UIX_VERSION = "1.0.0";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nowISO = () => new Date().toISOString();
+const fmtDate = iso => { try { return new Date(iso).toLocaleString(); } catch (e) { return iso; } };
+function toast(msg, ms = 2600) { const t = $("#toast"); if (!t) return; t.textContent = msg; t.style.display = "block"; clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = "none", ms); }
+function safeUrl(u) { try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; } catch (e) { return ""; } }
+
+/* ---------- storage (always guarded) ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+  raw(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  setRaw(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); return true; } catch (e) { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { } }
+};
+/* Shared key name: every one of your tools hosted on the same GitHub Pages site reads the same saved key. */
+const SHARED_KEY_NAME = "anthropic_api_key";
+
+const CATEGORIES = [
+  ["auto", "Automatic (recommended)"], ["chemistry", "Chemistry & chemical substances"], ["element", "Periodic-table element"],
+  ["health", "Human health & diseases"], ["drug", "Medicines & drug labels"], ["visual", "Visual identification (photos)"],
+  ["biology", "Biology & living organisms"], ["physics", "Physics, materials & engineering"], ["term", "Dictionary & terminology"],
+  ["earth", "Astronomy, geology & environment"], ["product", "Consumer products & food ingredients"], ["general", "General research"]
+];
+
+const DEFAULT_SETTINGS = {
+  mode: "direct", model: "claude-sonnet-5-5", tokens: 12000, proxy: "",
+  web: "on", webver: "web_search_20250305", webmax: 5,
+  ncbimail: "", timeout: 15000, rate: 30, cache: 6, hist: "30", himg: "no", defcat: "auto", theme: "auto",
+  conn: {}, connTest: {}
+};
+let S = Object.assign({}, DEFAULT_SETTINGS, store.get("uix_settings", {}));
+function saveS() { store.set("uix_settings", S); }
+const secrets = {
+  get anthropic() { return store.raw(SHARED_KEY_NAME); },
+  get ncbi() { return store.raw("uix_ncbi_key"); },
+  get epa() { return store.raw("uix_epa_key"); },
+  get wsid() { return store.raw("anthropic_workspace_id"); }
+};
+
+/* ---------- rate limiting ---------- */
+function rateCheck() {
+  const hr = Date.now() - 3600e3;
+  const log = store.get("uix_rate", []).filter(t => t > hr);
+  if (log.length >= Number(S.rate || 30)) return false;
+  log.push(Date.now()); store.set("uix_rate", log); return true;
+}
+
+/* ---------- record cache (honest: cached records keep their original retrieval time) ---------- */
+const cache = {
+  get(key) {
+    if (!Number(S.cache)) return null;
+    const c = store.get("uix_cache", {}); const e = c[key];
+    if (!e) return null;
+    if (Date.now() - e.t > Number(S.cache) * 3600e3) return null;
+    return e;
+  },
+  put(key, data) {
+    if (!Number(S.cache)) return;
+    let c = store.get("uix_cache", {}); c[key] = { t: Date.now(), data };
+    const keys = Object.keys(c); if (keys.length > 300) keys.sort((a, b) => c[a].t - c[b].t).slice(0, keys.length - 300).forEach(k => delete c[k]);
+    if (!store.set("uix_cache", c)) { store.del("uix_cache"); }
+  },
+  clear() { store.del("uix_cache"); }
+};
+
+/* =====================================================================
+   PERIODIC TABLE — all 118 elements.
+   Fields: Z, symbol, name, standard atomic weight (IUPAC abridged / conventional;
+   values in [brackets] are the mass number of the longest-lived known isotope —
+   these elements have no standard atomic weight), group (blank for La–Lu / Ac–Lr
+   shown in the f-block rows), period, class code.
+   Class codes: a alkali metal, e alkaline earth metal, t transition metal,
+   p post-transition metal, m metalloid, n reactive nonmetal, h halogen,
+   g noble gas, l lanthanide, c actinide, u superheavy (properties largely predicted)
+   ===================================================================== */
+const ELEMENT_DATA = `1,H,Hydrogen,1.008,1,1,n
+2,He,Helium,4.0026,18,1,g
+3,Li,Lithium,6.94,1,2,a
+4,Be,Beryllium,9.0122,2,2,e
+5,B,Boron,10.81,13,2,m
+6,C,Carbon,12.011,14,2,n
+7,N,Nitrogen,14.007,15,2,n
+8,O,Oxygen,15.999,16,2,n
+9,F,Fluorine,18.998,17,2,h
+10,Ne,Neon,20.180,18,2,g
+11,Na,Sodium,22.990,1,3,a
+12,Mg,Magnesium,24.305,2,3,e
+13,Al,Aluminum,26.982,13,3,p
+14,Si,Silicon,28.085,14,3,m
+15,P,Phosphorus,30.974,15,3,n
+16,S,Sulfur,32.06,16,3,n
+17,Cl,Chlorine,35.45,17,3,h
+18,Ar,Argon,39.95,18,3,g
+19,K,Potassium,39.098,1,4,a
+20,Ca,Calcium,40.078,2,4,e
+21,Sc,Scandium,44.956,3,4,t
+22,Ti,Titanium,47.867,4,4,t
+23,V,Vanadium,50.942,5,4,t
+24,Cr,Chromium,51.996,6,4,t
+25,Mn,Manganese,54.938,7,4,t
+26,Fe,Iron,55.845,8,4,t
+27,Co,Cobalt,58.933,9,4,t
+28,Ni,Nickel,58.693,10,4,t
+29,Cu,Copper,63.546,11,4,t
+30,Zn,Zinc,65.38,12,4,t
+31,Ga,Gallium,69.723,13,4,p
+32,Ge,Germanium,72.630,14,4,m
+33,As,Arsenic,74.922,15,4,m
+34,Se,Selenium,78.971,16,4,n
+35,Br,Bromine,79.904,17,4,h
+36,Kr,Krypton,83.798,18,4,g
+37,Rb,Rubidium,85.468,1,5,a
+38,Sr,Strontium,87.62,2,5,e
+39,Y,Yttrium,88.906,3,5,t
+40,Zr,Zirconium,91.224,4,5,t
+41,Nb,Niobium,92.906,5,5,t
+42,Mo,Molybdenum,95.95,6,5,t
+43,Tc,Technetium,[97],7,5,t
+44,Ru,Ruthenium,101.07,8,5,t
+45,Rh,Rhodium,102.91,9,5,t
+46,Pd,Palladium,106.42,10,5,t
+47,Ag,Silver,107.87,11,5,t
+48,Cd,Cadmium,112.41,12,5,t
+49,In,Indium,114.82,13,5,p
+50,Sn,Tin,118.71,14,5,p
+51,Sb,Antimony,121.76,15,5,m
+52,Te,Tellurium,127.60,16,5,m
+53,I,Iodine,126.90,17,5,h
+54,Xe,Xenon,131.29,18,5,g
+55,Cs,Cesium,132.91,1,6,a
+56,Ba,Barium,137.33,2,6,e
+57,La,Lanthanum,138.91,,6,l
+58,Ce,Cerium,140.12,,6,l
+59,Pr,Praseodymium,140.91,,6,l
+60,Nd,Neodymium,144.24,,6,l
+61,Pm,Promethium,[145],,6,l
+62,Sm,Samarium,150.36,,6,l
+63,Eu,Europium,151.96,,6,l
+64,Gd,Gadolinium,157.25,,6,l
+65,Tb,Terbium,158.93,,6,l
+66,Dy,Dysprosium,162.50,,6,l
+67,Ho,Holmium,164.93,,6,l
+68,Er,Erbium,167.26,,6,l
+69,Tm,Thulium,168.93,,6,l
+70,Yb,Ytterbium,173.05,,6,l
+71,Lu,Lutetium,174.97,,6,l
+72,Hf,Hafnium,178.49,4,6,t
+73,Ta,Tantalum,180.95,5,6,t
+74,W,Tungsten,183.84,6,6,t
+75,Re,Rhenium,186.21,7,6,t
+76,Os,Osmium,190.23,8,6,t
+77,Ir,Iridium,192.22,9,6,t
+78,Pt,Platinum,195.08,10,6,t
+79,Au,Gold,196.97,11,6,t
+80,Hg,Mercury,200.59,12,6,t
+81,Tl,Thallium,204.38,13,6,p
+82,Pb,Lead,207.2,14,6,p
+83,Bi,Bismuth,208.98,15,6,p
+84,Po,Polonium,[209],16,6,p
+85,At,Astatine,[210],17,6,h
+86,Rn,Radon,[222],18,6,g
+87,Fr,Francium,[223],1,7,a
+88,Ra,Radium,[226],2,7,e
+89,Ac,Actinium,[227],,7,c
+90,Th,Thorium,232.04,,7,c
+91,Pa,Protactinium,231.04,,7,c
+92,U,Uranium,238.03,,7,c
+93,Np,Neptunium,[237],,7,c
+94,Pu,Plutonium,[244],,7,c
+95,Am,Americium,[243],,7,c
+96,Cm,Curium,[247],,7,c
+97,Bk,Berkelium,[247],,7,c
+98,Cf,Californium,[251],,7,c
+99,Es,Einsteinium,[252],,7,c
+100,Fm,Fermium,[257],,7,c
+101,Md,Mendelevium,[258],,7,c
+102,No,Nobelium,[259],,7,c
+103,Lr,Lawrencium,[266],,7,c
+104,Rf,Rutherfordium,[267],4,7,t
+105,Db,Dubnium,[268],5,7,t
+106,Sg,Seaborgium,[269],6,7,t
+107,Bh,Bohrium,[270],7,7,t
+108,Hs,Hassium,[269],8,7,t
+109,Mt,Meitnerium,[278],9,7,u
+110,Ds,Darmstadtium,[281],10,7,u
+111,Rg,Roentgenium,[282],11,7,u
+112,Cn,Copernicium,[285],12,7,u
+113,Nh,Nihonium,[286],13,7,u
+114,Fl,Flerovium,[289],14,7,u
+115,Mc,Moscovium,[290],15,7,u
+116,Lv,Livermorium,[293],16,7,u
+117,Ts,Tennessine,[294],17,7,u
+118,Og,Oganesson,[294],18,7,u`;
+const CLASS_NAMES = { a: "Alkali metal", e: "Alkaline earth metal", t: "Transition metal", p: "Post-transition metal", m: "Metalloid", n: "Reactive nonmetal", h: "Halogen", g: "Noble gas", l: "Lanthanide", c: "Actinide", u: "Superheavy element (properties largely predicted)" };
+const CLASS_CSS = { a: "c-alkali", e: "c-alkaline", t: "c-tm", p: "c-post", m: "c-metalloid", n: "c-nonmetal", h: "c-halogen", g: "c-noble", l: "c-lan", c: "c-act", u: "c-unk" };
+const ELEMENTS = ELEMENT_DATA.split("\n").map(l => {
+  const [z, sym, name, mass, group, period, cls] = l.split(",");
+  const bracket = mass.startsWith("[");
+  return { z: +z, sym, name, mass: bracket ? +mass.slice(1, -1) : +mass, massText: mass, massIsIsotope: bracket,
+    group: group ? +group : null, period: +period, cls, className: CLASS_NAMES[cls],
+    radioactive: (+z === 43 || +z === 61 || +z >= 84),
+    block: (cls === "l" || cls === "c") ? "f" : (group === "1" || group === "2" || sym === "He") ? "s" : (+group >= 13) ? "p" : "d" };
+});
+ELEMENTS.find(e => e.sym === "He").block = "s";
+const EL_BY_SYM = Object.fromEntries(ELEMENTS.map(e => [e.sym, e]));
+const EL_BY_NAME = Object.fromEntries(ELEMENTS.map(e => [e.name.toLowerCase(), e]));
+EL_BY_NAME["aluminium"] = EL_BY_SYM.Al; EL_BY_NAME["sulphur"] = EL_BY_SYM.S; EL_BY_NAME["caesium"] = EL_BY_SYM.Cs;
+function findElement(q) {
+  q = String(q || "").trim();
+  if (!q) return null;
+  if (/^\d{1,3}$/.test(q)) return ELEMENTS[+q - 1] || null;
+  if (EL_BY_SYM[q]) return EL_BY_SYM[q];
+  return EL_BY_NAME[q.toLowerCase()] || null;
+}
+
+/* =====================================================================
+   CHEMISTRY ENGINE — formula parsing, molar mass, CAS check, equation balancing
+   (pure arithmetic on stated formulas; never invents reaction products)
+   ===================================================================== */
+function parseFormula(f) {
+  let s = String(f || "").trim().replace(/\s+/g, "");
+  if (!s || s.length > 120) throw new Error("empty or too long");
+  s = s.replace(/[\u2080-\u2089]/g, d => String(d.charCodeAt(0) - 0x2080)).replace(/[·•*]/g, ".");
+  s = s.replace(/\^\d*[+-]$/, ""); /* ion charge written as ^2+ is ignored for counting */
+  const parts = s.split(".");
+  const total = {};
+  for (let pi = 0; pi < parts.length; pi++) {
+    let p = parts[pi]; let mult = 1;
+    if (pi > 0) { const m = p.match(/^(\d+)(.*)$/); if (m) { mult = +m[1]; p = m[2]; } }
+    if (!p) throw new Error("empty part");
+    const counts = parseGroup(p);
+    for (const k in counts) total[k] = (total[k] || 0) + counts[k] * mult;
+  }
+  return total;
+}
+function parseGroup(s) {
+  let i = 0;
+  function seq(close) {
+    const out = {};
+    while (i < s.length) {
+      const c = s[i];
+      if (c === "(" || c === "[") {
+        const want = c === "(" ? ")" : "]"; i++;
+        const inner = seq(want);
+        if (s[i] !== want) throw new Error("unbalanced brackets");
+        i++; const n = num(); for (const k in inner) out[k] = (out[k] || 0) + inner[k] * n;
+      } else if (c === ")" || c === "]") { if (!close) throw new Error("unbalanced brackets"); return out; }
+      else if (/[A-Z]/.test(c)) {
+        let sym = c; i++;
+        if (i < s.length && /[a-z]/.test(s[i])) { sym += s[i]; i++; }
+        if (!EL_BY_SYM[sym]) throw new Error("unknown element symbol " + sym);
+        const n = num(); out[sym] = (out[sym] || 0) + n;
+      } else throw new Error("unexpected character " + c);
+    }
+    if (close) throw new Error("unbalanced brackets");
+    return out;
+  }
+  function num() { let d = ""; while (i < s.length && /\d/.test(s[i])) d += s[i++]; return d ? +d : 1; }
+  const r = seq(null);
+  if (!Object.keys(r).length) throw new Error("no elements");
+  return r;
+}
+function looksLikeFormula(t) {
+  t = String(t || "").trim();
+  if (!/^[A-Z\(\[][A-Za-z0-9\(\)\[\]·.*\u2080-\u2089]*$/.test(t)) return false;
+  try { const c = parseFormula(t); const n = Object.keys(c).length; return n >= 1 && (n > 1 || /\d/.test(t) || !!EL_BY_SYM[t]); } catch (e) { return false; }
+}
+function molarMass(counts) {
+  let m = 0, approx = false;
+  for (const k in counts) { const e = EL_BY_SYM[k]; if (e.massIsIsotope) approx = true; m += e.mass * counts[k]; }
+  return { value: m, approx };
+}
+function hillFormula(counts) {
+  const ks = Object.keys(counts); let order;
+  if (counts.C) order = ["C", ...(counts.H ? ["H"] : []), ...ks.filter(k => k !== "C" && k !== "H").sort()];
+  else order = ks.sort();
+  return order.map(k => k + (counts[k] > 1 ? counts[k] : "")).join("");
+}
+function validCAS(s) {
+  const m = String(s || "").trim().match(/^(\d{2,7})-(\d{2})-(\d)$/);
+  if (!m) return false;
+  const digits = (m[1] + m[2]).split("").reverse();
+  const sum = digits.reduce((a, d, i) => a + (+d) * (i + 1), 0);
+  return sum % 10 === +m[3];
+}
+/* --- exact rational arithmetic with BigInt for balancing --- */
+const gcdB = (a, b) => { a = a < 0n ? -a : a; b = b < 0n ? -b : b; while (b) { [a, b] = [b, a % b]; } return a; };
+const fr = (n, d = 1n) => { if (d < 0n) { n = -n; d = -d; } const g = gcdB(n, d) || 1n; return [n / g, d / g]; };
+const fAdd = (a, b) => fr(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
+const fMul = (a, b) => fr(a[0] * b[0], a[1] * b[1]);
+const fDiv = (a, b) => fr(a[0] * b[1], a[1] * b[0]);
+const fNeg = a => [-a[0], a[1]];
+function nullspace(M) {
+  const rows = M.length, cols = M[0].length; const A = M.map(r => r.map(v => fr(BigInt(v))));
+  let pivCols = [], r = 0;
+  for (let c = 0; c < cols && r < rows; c++) {
+    let p = -1; for (let k = r; k < rows; k++) if (A[k][c][0] !== 0n) { p = k; break; }
+    if (p < 0) continue;
+    [A[r], A[p]] = [A[p], A[r]];
+    const pv = A[r][c]; A[r] = A[r].map(v => fDiv(v, pv));
+    for (let k = 0; k < rows; k++) if (k !== r && A[k][c][0] !== 0n) { const f = A[k][c]; A[k] = A[k].map((v, j) => fAdd(v, fNeg(fMul(f, A[r][j])))); }
+    pivCols.push(c); r++;
+  }
+  const free = []; for (let c = 0; c < cols; c++) if (!pivCols.includes(c)) free.push(c);
+  return free.map(fc => { const v = Array(cols).fill(null).map(() => fr(0n)); v[fc] = fr(1n); pivCols.forEach((pc, i) => { v[pc] = fNeg(A[i][fc]); }); return v; });
+}
+function splitEquation(t) {
+  const s = String(t || "").replace(/\s+/g, " ").trim();
+  const arrow = s.match(/\s*(->|→|⟶|=>|<=>|⇌|=)\s*/);
+  const side = x => x.split(/\s\+\s|\s\+|\+\s|(?<=[A-Za-z0-9\)\]])\+(?=[A-Z\(\[0-9])/).map(y => y.trim()).filter(Boolean);
+  if (arrow) { const [l, rr] = [s.slice(0, arrow.index), s.slice(arrow.index + arrow[0].length)]; return { reactants: side(l), products: side(rr), hasArrow: true }; }
+  if (/\+/.test(s)) return { reactants: side(s), products: [], hasArrow: false };
+  return null;
+}
+function stripCoef(sp) { const m = sp.match(/^(\d+)\s*([A-Z\(\[].*)$/); return m ? m[2] : sp; }
+function stripState(sp) { return sp.replace(/\((s|l|g|aq)\)$/i, ""); }
+function balanceEquation(reactants, products) {
+  const species = [...reactants, ...products].map(x => stripState(stripCoef(x)));
+  const parsed = species.map(parseFormula);
+  const els = [...new Set(parsed.flatMap(p => Object.keys(p)))];
+  const M = els.map(e => parsed.map((p, j) => (p[e] || 0) * (j < reactants.length ? 1 : -1)));
+  const ns = nullspace(M);
+  if (ns.length !== 1) return { ok: false, reason: ns.length === 0 ? "These species cannot be balanced — the elements on each side do not match." : "More than one independent balanced form exists; the equation is ambiguous as written." };
+  let v = ns[0]; let lcm = 1n; v.forEach(x => { lcm = lcm * x[1] / gcdB(lcm, x[1]); });
+  let ints = v.map(x => x[0] * (lcm / x[1]));
+  if (ints.some(x => x < 0n)) ints = ints.map(x => -x);
+  if (ints.some(x => x <= 0n)) return { ok: false, reason: "No all-positive balance exists for these species." };
+  let g = ints.reduce((a, b) => gcdB(a, b)); ints = ints.map(x => x / g);
+  const fmt = (arr, off) => arr.map((sp, i) => { const c = ints[i + off]; return (c === 1n ? "" : c + " ") + stripState(stripCoef(sp)); }).join(" + ");
+  return { ok: true, coefficients: ints.map(Number), equation: fmt(reactants, 0) + " → " + fmt(products, reactants.length) };
+}
+
+/* ---------- input detection (used for routing and for no-AI mode) ---------- */
+const EMERGENCY_RX = /\b(can'?t breathe|cannot breathe|not breathing|trouble breathing|difficulty breathing|chest pain|heart attack|stroke|face drooping|unconscious|unresponsive|passed out|seizure|overdos|swallowed|ingested|drank (bleach|chemical|cleaner|poison)|poison(ed|ing)|anaphyla|throat (closing|swelling)|severe bleeding|bleeding heavily|suicid|kill myself|chemical burn|in (my|his|her|their) eyes?|gas leak|smell gas|carbon monoxide|fire|explosion|turning blue|baby .*(fell|swallowed))\b/i;
+function detectEmergency(t) { return EMERGENCY_RX.test(String(t || "")); }
+function splitItems(t) {
+  let s = String(t || "").trim().replace(/\?+$/, "");
+  s = s.replace(/^(what (are|is)|identify|compare|explain|tell me about)\s+/i, "");
+  s = s.replace(/[,;]?\s*(and )?(can|do|will|would|does|are) (they|these|it) .*$/i, "");
+  const parts = s.split(/\s*(?:,|;|\n|\band\b|&)\s*/i).map(x => x.trim()).filter(Boolean);
+  return parts.length ? parts : [s];
+}
+function localClassify(text) {
+  const t = String(text || "").trim();
+  const out = { emergency: detectEmergency(t), equation: null, items: [] };
+  const eq = splitEquation(t);
+  if (eq && eq.reactants.length && eq.reactants.every(x => looksLikeFormula(stripState(stripCoef(x)))) && eq.products.every(x => looksLikeFormula(stripState(stripCoef(x))))) {
+    out.equation = eq;
+    eq.reactants.concat(eq.products).forEach(x => { const f = stripState(stripCoef(x)); out.items.push(classifyOne(f)); });
+    return out;
+  }
+  splitItems(t).forEach(x => out.items.push(classifyOne(x)));
+  return out;
+}
+function classifyOne(x) {
+  const s = String(x).trim();
+  if (validCAS(s)) return { text: s, kind: "cas", search: s };
+  const el = /^[A-Z][a-z]?$/.test(s) ? EL_BY_SYM[s] : EL_BY_NAME[s.toLowerCase()];
+  if (el) return { text: s, kind: "element", search: el.name, element: el.sym };
+  if (/^\d{1,3}$/.test(s) && +s >= 1 && +s <= 118) return { text: s, kind: "element", search: ELEMENTS[+s - 1].name, element: ELEMENTS[+s - 1].sym };
+  if (looksLikeFormula(s)) return { text: s, kind: "formula", search: s, formula: s };
+  if (/^\d{2,7}-\d{2}-\d$/.test(s)) return { text: s, kind: "invalid-id", search: s };
+  return { text: s, kind: "name", search: s };
+}
+/* =====================================================================
+   Part 2: live data connectors. Every record carries its URL, retrieval
+   time and provenance (live / cached / local). A connector that fails
+   throws — the pipeline reports it as unavailable; nothing is invented.
+   ===================================================================== */
+const DEAD_URL = "https://uix-forced-failure.invalid/";
+async function getJSON(url, opt = {}, ctx = {}) { return fetchData(url, opt, ctx, "json"); }
+async function getText(url, opt = {}, ctx = {}) { return fetchData(url, opt, ctx, "text"); }
+async function fetchData(url, opt, ctx, kind) {
+  const key = kind + ":" + url;
+  if (!opt.noCache) { const c = cache.get(key); if (c) return { data: c.data, cached: true, retrieved: new Date(c.t).toISOString() }; }
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), Number(S.timeout) || 15000);
+  let r;
+  try { r = await fetch(url, { headers: opt.headers || {}, signal: ctl.signal }); }
+  catch (e) { clearTimeout(tm); throw new Error(e.name === "AbortError" ? "timed out" : "network/CORS error — the source could not be reached from this page"); }
+  clearTimeout(tm);
+  if (r.status === 404) { const e = new Error("no matching record (HTTP 404)"); e.notFound = true; throw e; }
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const data = kind === "json" ? await r.json() : await r.text();
+  if (!opt.noCache) cache.put(key, data);
+  return { data, cached: false, retrieved: nowISO() };
+}
+const enc = encodeURIComponent;
+const trunc = (s, n) => { s = String(s || "").replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n) + "…" : s; };
+const stripTags = h => { try { return new DOMParser().parseFromString(String(h || ""), "text/html").body.textContent || ""; } catch (e) { return String(h || "").replace(/<[^>]+>/g, " "); } };
+function rec(connector, title, url, got, facts, text, extra = {}) {
+  return Object.assign({ connector, title, url: safeUrl(url), retrieved: got ? got.retrieved : nowISO(), provenance: got ? (got.cached ? "cached" : "live") : "local", facts: facts || {}, text: trunc(text, 2400) }, extra);
+}
+function U(ctx, id, url) { return ctx && ctx.forceFail && ctx.forceFail.includes(id) ? DEAD_URL : url; }
+
+const CONNECTORS = [
+  { id: "elements", name: "Built-in periodic table (118 elements)", covers: "Element number, symbol, weight, group, period, class", local: true, kinds: ["element"],
+    async test() { return ELEMENTS.length === 118 ? "118 elements loaded" : "dataset incomplete"; },
+    async run(item) {
+      const e = findElement(item.element || item.search); if (!e) return [];
+      return [rec("elements", e.name + " — built-in periodic table", "", null,
+        { "Atomic number": e.z, Symbol: e.sym, Name: e.name, [e.massIsIsotope ? "Mass number of longest-lived isotope" : "Standard atomic weight"]: e.massText, Group: e.group || "f-block (" + e.className + ")", Period: e.period, Block: e.block, Class: e.className, Radioactive: e.radioactive ? "Yes (no stable isotopes)" : "No" },
+        `${e.name} (${e.sym}), atomic number ${e.z}, ${e.massIsIsotope ? "mass number of longest-lived isotope " + e.mass : "standard atomic weight " + e.massText}, group ${e.group || "f-block"}, period ${e.period}, ${e.className}${e.radioactive ? ", radioactive" : ""}.`)];
+    } },
+  { id: "pcperiodic", name: "PubChem Periodic Table", covers: "Live element properties: configuration, density, melting/boiling point, discovery", kinds: ["element"],
+    async test(ctx) { const t = await pubchemTable(ctx); return t.length + " elements returned"; },
+    async run(item, ctx) {
+      const e = findElement(item.element || item.search); if (!e) return [];
+      const rows = await pubchemTable(ctx); const r = rows.find(x => +x.AtomicNumber === e.z); if (!r) return [];
+      const keep = ["AtomicMass", "ElectronConfiguration", "Electronegativity", "AtomicRadius", "IonizationEnergy", "ElectronAffinity", "OxidationStates", "StandardState", "MeltingPoint", "BoilingPoint", "Density", "GroupBlock", "YearDiscovered"];
+      const f = {}; keep.forEach(k => { if (r[k] !== "" && r[k] != null) f[k.replace(/([A-Z])/g, " $1").trim()] = r[k] + ({ MeltingPoint: " K", BoilingPoint: " K", Density: " g/cm³", AtomicRadius: " pm", IonizationEnergy: " eV", ElectronAffinity: " eV" }[k] || ""); });
+      if (Math.abs(+r.AtomicMass - e.mass) > 1) f["Note"] = "PubChem mass differs from built-in value by more than 1 — check isotope convention.";
+      return [rec("pcperiodic", e.name + " — PubChem element record", "https://pubchem.ncbi.nlm.nih.gov/element/" + e.z, rows._got, f, Object.entries(f).map(([k, v]) => k + ": " + v).join("; "))];
+    } },
+  { id: "pubchem", name: "PubChem (NCBI)", covers: "Chemical identity, formula, weight, identifiers, structure, GHS hazards", kinds: ["formula", "cas", "compound", "chemical", "product-ingredient", "drug"],
+    async test(ctx) { const g = await getJSON(U(ctx, "pubchem", "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/water/cids/JSON"), { noCache: true }); return "water → CID " + g.data.IdentifierList.CID[0]; },
+    async run(item, ctx) { return pubchemLookup(item, ctx); } },
+  { id: "comptox", name: "EPA CompTox Chemicals Dashboard", covers: "EPA chemical identity (DTXSID), CAS — needs free API key", kinds: ["formula", "cas", "compound", "chemical", "product-ingredient"], needsKey: "epa",
+    async test(ctx) { if (!secrets.epa) throw new Error("add your EPA CompTox key first"); const g = await getJSON(U(ctx, "comptox", "https://api-ccte.epa.gov/chemical/search/equal/water"), { noCache: true, headers: { "x-api-key": secrets.epa, accept: "application/json" } }); return (g.data[0] && g.data[0].dtxsid) || "connected"; },
+    async run(item, ctx) {
+      if (!secrets.epa) return [];
+      const q = item.cas || item.name || item.search;
+      const g = await getJSON(U(ctx, "comptox", "https://api-ccte.epa.gov/chemical/search/equal/" + enc(q)), { headers: { "x-api-key": secrets.epa, accept: "application/json" } });
+      const d = (g.data || [])[0]; if (!d) return [];
+      return [rec("comptox", (d.preferredName || q) + " — EPA CompTox", "https://comptox.epa.gov/dashboard/chemical/details/" + d.dtxsid, g, { DTXSID: d.dtxsid, "Preferred name": d.preferredName, CAS: d.casrn }, `EPA CompTox record ${d.dtxsid}: ${d.preferredName}, CAS ${d.casrn}.`)];
+    } },
+  { id: "medlineplus", name: "MedlinePlus (NLM/NIH)", covers: "Diseases, conditions, symptoms, tests, treatments — patient education", kinds: ["disease", "condition", "symptom", "health", "term-medical", "drug", "test"],
+    async test(ctx) { const r = await medlineAny("asthma", ctx, true); return r.length ? (r.via ? "OK via backup route (" + r.via + ") — " : "direct — ") + r.length + " record(s)" : "no results"; },
+    async run(item, ctx) { return medlineAny(item.search, ctx); } },
+  { id: "pubmed", name: "PubMed (NCBI E-utilities)", covers: "Biomedical research articles, reviews, guidelines", kinds: ["disease", "condition", "health", "drug", "research", "treatment"],
+    async test(ctx) { const r = await pubmed("asthma", ctx, true, 1); return r.length + " article(s) returned"; },
+    async run(item, ctx) { return pubmed(item.research_query || item.search, ctx, false, 4); } },
+  { id: "ctgov", name: "ClinicalTrials.gov", covers: "Registered clinical studies, status, phase", kinds: ["disease", "condition", "treatment", "drug"],
+    async test(ctx) { const g = await getJSON(U(ctx, "ctgov", "https://clinicaltrials.gov/api/v2/studies?query.cond=asthma&pageSize=1"), { noCache: true }); return (g.data.studies || []).length + " study returned"; },
+    async run(item, ctx) {
+      const g = await getJSON(U(ctx, "ctgov", "https://clinicaltrials.gov/api/v2/studies?query.cond=" + enc(item.search) + "&pageSize=4"));
+      return (g.data.studies || []).map(s => { const p = s.protocolSection || {}; const id = (p.identificationModule || {}).nctId; const st = p.statusModule || {};
+        return rec("ctgov", (p.identificationModule || {}).briefTitle || id, "https://clinicaltrials.gov/study/" + id, g, { NCT: id, Status: st.overallStatus, Phase: ((p.designModule || {}).phases || []).join(", ") || "n/a", "Last update": (st.lastUpdatePostDateStruct || {}).date },
+          `Clinical trial ${id}: ${(p.identificationModule || {}).briefTitle}. Status ${st.overallStatus}. Conditions: ${((p.conditionsModule || {}).conditions || []).join(", ")}.`); });
+    } },
+  { id: "openfda", name: "openFDA drug labels", covers: "Official US drug labeling: warnings, contraindications, uses", kinds: ["drug"],
+    async test(ctx) { const g = await getJSON(U(ctx, "openfda", 'https://api.fda.gov/drug/label.json?search=openfda.generic_name:"ibuprofen"&limit=1'), { noCache: true }); return (g.data.results || []).length ? "ibuprofen label found" : "no results"; },
+    async run(item, ctx) {
+      const q = item.search.replace(/"/g, "");
+      const g = await getJSON(U(ctx, "openfda", `https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${enc(q)}"+openfda.brand_name:"${enc(q)}"+openfda.substance_name:"${enc(q)}"&limit=1`));
+      const d = (g.data.results || [])[0]; if (!d) return [];
+      const pick = k => d[k] ? trunc(d[k].join(" "), 700) : undefined;
+      const f = { "Brand name": ((d.openfda || {}).brand_name || []).join(", "), "Generic name": ((d.openfda || {}).generic_name || []).join(", "), "Label effective": d.effective_time };
+      const parts = ["boxed_warning", "indications_and_usage", "purpose", "contraindications", "do_not_use", "warnings", "stop_use", "keep_out_of_reach_of_children"].map(k => pick(k) ? k.replace(/_/g, " ").toUpperCase() + ": " + pick(k) : "").filter(Boolean);
+      return [rec("openfda", (f["Brand name"] || f["Generic name"] || q) + " — FDA label (openFDA)", d.set_id ? "https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=" + d.set_id : "https://open.fda.gov/apis/drug/label/", g, f, parts.join(" | "))];
+    } },
+  { id: "dailymed", name: "DailyMed (NLM)", covers: "Official drug label listings (SPL)", kinds: ["drug"],
+    async test(ctx) { const r = await dailymedAny("ibuprofen", ctx, true); return r.length ? (r.via ? "OK via backup route (" + r.via + ") — " : "direct — ") + r.length + " label(s)" : "no results"; },
+    async run(item, ctx) { return dailymedAny(item.search, ctx); } },
+  { id: "dictionary", name: "Free Dictionary API (Wiktionary data)", covers: "English definitions, pronunciation, parts of speech, examples", kinds: ["term", "term-medical", "word"],
+    async test(ctx) { const g = await getJSON(U(ctx, "dictionary", "https://api.dictionaryapi.dev/api/v2/entries/en/catalyst"), { noCache: true }); return "catalyst → " + g.data[0].meanings.length + " meaning group(s)"; },
+    async run(item, ctx) {
+      const w = item.search.trim().toLowerCase(); if (w.split(/\s+/).length > 3) return [];
+      const g = await getJSON(U(ctx, "dictionary", "https://api.dictionaryapi.dev/api/v2/entries/en/" + enc(w)));
+      const d = g.data[0]; const ph = (d.phonetics || []).map(p => p.text).filter(Boolean)[0] || d.phonetic || "";
+      const defs = []; (d.meanings || []).forEach(m => (m.definitions || []).slice(0, 3).forEach(x => defs.push(`(${m.partOfSpeech}) ${x.definition}${x.example ? " — e.g. “" + x.example + "”" : ""}`)));
+      return [rec("dictionary", d.word + " — dictionary entry", (d.sourceUrls || [])[0] || "https://en.wiktionary.org/wiki/" + enc(w), g, { Word: d.word, Pronunciation: ph || "not listed", License: (d.license || {}).name || "CC BY-SA (Wiktionary)" }, defs.join(" | "), { audio: ((d.phonetics || []).find(p => p.audio) || {}).audio })];
+    } },
+  { id: "wikipedia", name: "Wikipedia (encyclopedia overview & reference photo)", covers: "General overview; reference photo with attribution — community-edited, lower authority", kinds: ["*"],
+    async test(ctx) { const g = await getJSON(U(ctx, "wikipedia", "https://en.wikipedia.org/api/rest_v1/page/summary/Iron"), { noCache: true }); return "Iron → " + trunc(g.data.description, 40); },
+    async run(item, ctx) {
+      const s = await getJSON(U(ctx, "wikipedia", "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=1&srsearch=" + enc(item.wiki || item.search)));
+      const hit = ((s.data.query || {}).search || [])[0]; if (!hit) return [];
+      const g = await getJSON(U(ctx, "wikipedia", "https://en.wikipedia.org/api/rest_v1/page/summary/" + enc(hit.title.replace(/ /g, "_"))));
+      const d = g.data; if (d.type === "disambiguation") return [];
+      const img = d.thumbnail ? { src: d.thumbnail.source, kind: "photo", caption: "Reference image from the Wikipedia article “" + d.title + "” (Wikimedia Commons — open the file page for author and license)", link: (d.content_urls || {}).desktop ? d.content_urls.desktop.page : "" } : null;
+      return [rec("wikipedia", d.title + " — Wikipedia", (d.content_urls || {}).desktop ? d.content_urls.desktop.page : "https://en.wikipedia.org/wiki/" + enc(d.title), g, { Description: d.description || "" }, d.extract, { image: img, lowAuthority: true })];
+    } },
+  { id: "web", name: "Authoritative web research (via Claude web search)", covers: "CDC, WHO, NIH, FDA, EPA, ECHA, NIST, NASA, USGS, NOAA and similar sites", ai: true,
+    async test() { const r = await aiWebResearch("CDC page on how to prevent carbon monoxide poisoning", ["cdc.gov"], 1); return r.records.length + " cited source(s) returned"; } }
+];
+const CONN = Object.fromEntries(CONNECTORS.map(c => [c.id, c]));
+function connOn(id) { return S.conn[id] !== false; }
+
+/* ---------- PubChem helpers ---------- */
+async function pubchemTable(ctx) {
+  const g = await getJSON(U(ctx, "pcperiodic", "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"));
+  const cols = g.data.Table.Columns.Column; const rows = g.data.Table.Row.map(r => Object.fromEntries(cols.map((c, i) => [c, r.Cell[i]])));
+  rows._got = g; return rows;
+}
+async function pubchemLookup(item, ctx) {
+  const base = U(ctx, "pubchem", "https://pubchem.ncbi.nlm.nih.gov/rest/pug");
+  let cids = [], how = "", gotIds;
+  const tryName = async n => { try { const g = await getJSON(base + "/compound/name/" + enc(n) + "/cids/JSON"); gotIds = g; return g.data.IdentifierList.CID; } catch (e) { if (e.notFound) return []; throw e; } };
+  if (item.cas) { cids = await tryName(item.cas); how = "CAS number"; }
+  if (!cids.length && item.name) { cids = await tryName(item.name); how = "name"; }
+  if (!cids.length && item.search) { cids = await tryName(item.search); how = item.kind === "formula" ? "formula as synonym" : "name"; }
+  let formulaMatches = 0;
+  if (!cids.length && item.formula) {
+    try { const g = await getJSON(base + "/compound/fastformula/" + enc(item.formula) + "/cids/JSON?MaxRecords=25"); gotIds = g; cids = g.data.IdentifierList.CID.slice().sort((a, b) => a - b); formulaMatches = cids.length; how = "molecular formula"; }
+    catch (e) { if (!e.notFound) throw e; }
+  }
+  if (!cids.length) return [];
+  const cid = cids[0];
+  const props = await getJSON(base + "/compound/cid/" + cid + "/property/Title,IUPACName,MolecularFormula,MolecularWeight,InChIKey,XLogP,Charge/JSON");
+  const p = props.data.PropertyTable.Properties[0];
+  let smiles = "";
+  for (const k of ["SMILES", "CanonicalSMILES"]) { try { const s = await getJSON(base + "/compound/cid/" + cid + "/property/" + k + "/JSON"); const v = s.data.PropertyTable.Properties[0]; smiles = v.SMILES || v.CanonicalSMILES || ""; if (smiles) break; } catch (e) { } }
+  let syn = [], cas = "";
+  try { const s = await getJSON(base + "/compound/cid/" + cid + "/synonyms/JSON"); syn = s.data.InformationList.Information[0].Synonym || []; cas = syn.find(x => validCAS(x)) || ""; } catch (e) { }
+  const f = { "PubChem CID": cid, Name: p.Title, "IUPAC name": p.IUPACName, "Molecular formula": p.MolecularFormula, "Molecular weight": p.MolecularWeight + " g/mol", "CAS (from synonyms)": cas || "not listed", InChIKey: p.InChIKey, SMILES: smiles || "not returned", XLogP: p.XLogP != null ? p.XLogP : "n/a", "Matched by": how };
+  if (formulaMatches > 1) f["Formula ambiguity"] = formulaMatches + "+ PubChem records share this formula; the lowest CID (usually the common substance) was used.";
+  if (item.formula) { try { const want = hillFormula(parseFormula(item.formula)); f["Formula check"] = want === p.MolecularFormula ? "matches entered formula" : "entered " + want + " vs record " + p.MolecularFormula; } catch (e) { } }
+  const url = "https://pubchem.ncbi.nlm.nih.gov/compound/" + cid;
+  const out = [rec("pubchem", p.Title + " — PubChem compound " + cid, url, props, f,
+    `PubChem CID ${cid}: ${p.Title}. IUPAC ${p.IUPACName}. Formula ${p.MolecularFormula}, MW ${p.MolecularWeight} g/mol. CAS ${cas || "n/a"}. Synonyms: ${syn.slice(0, 8).join("; ")}.`,
+    { image: { src: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + cid + "/PNG?image_size=300x300", kind: "schematic", caption: "2D structure depiction generated by PubChem from record CID " + cid + " (a drawing of the molecule, not a photograph)", link: url }, cid, cas })];
+  try {
+    const gh = await getJSON(base.replace("/rest/pug", "/rest/pug_view") + "/data/compound/" + cid + "/JSON?heading=GHS+Classification");
+    const ghs = parseGHS(gh.data);
+    if (ghs.statements.length || ghs.signal) out.push(rec("pubchem", p.Title + " — GHS hazard classification (PubChem)", url + "#section=GHS-Classification", gh,
+      { "Signal word": ghs.signal || "n/a", Pictograms: ghs.pictos.join(", ") || "n/a", "Reported by": ghs.source || "see record", "Classification sets on record": ghs.sets },
+      "GHS hazard statements: " + ghs.statements.join(" | ") + (ghs.sets > 1 ? ` (PubChem aggregates ${ghs.sets} notifications; classifications can differ between notifiers.)` : "")));
+  } catch (e) { if (e.notFound) out.push(rec("pubchem", p.Title + " — no GHS classification on PubChem", url, null, { Result: "PubChem has no GHS classification section for this record" }, "PubChem returned no GHS classification for this compound. Absence of a classification is not evidence of safety.", { provenance: "live" })); else throw e; }
+  return out;
+}
+function parseGHS(j) {
+  const res = { statements: [], signal: "", pictos: [], source: "", sets: 0 };
+  const refs = (j.Record && j.Record.Reference) || [];
+  const walk = n => {
+    if (!n) return;
+    if (Array.isArray(n)) return n.forEach(walk);
+    if (n.Information) n.Information.forEach(inf => {
+      const strs = ((inf.Value || {}).StringWithMarkup || []);
+      if (inf.Name === "GHS Hazard Statements") { res.sets++; if (res.sets === 1) { res.statements = strs.map(s => s.String).slice(0, 14); const r = refs.find(x => x.ReferenceNumber === inf.ReferenceNumber); res.source = r ? r.SourceName : ""; } }
+      if (inf.Name === "Signal" && !res.signal) res.signal = (strs[0] || {}).String || "";
+      if (inf.Name === "Pictogram(s)" && !res.pictos.length) strs.forEach(s => (s.Markup || []).forEach(m => m.Extra && res.pictos.push(m.Extra)));
+    });
+    if (n.Section) walk(n.Section);
+  };
+  walk(j.Record && j.Record.Section);
+  return res;
+}
+async function medline(term, ctx, test) {
+  const g = await getText(U(ctx, "medlineplus", "https://wsearch.nlm.nih.gov/ws/query?db=healthTopics&retmax=3&term=" + enc(term)), { noCache: !!test });
+  const x = new DOMParser().parseFromString(g.data, "text/xml");
+  return $$("document", x).slice(0, 2).map(d => {
+    const get = n => { const c = $$("content", d).find(c => c.getAttribute("name") === n); return c ? stripTags(c.textContent) : ""; };
+    const title = stripTags(get("title"));
+    return rec("medlineplus", title + " — MedlinePlus", d.getAttribute("url"), g, { "Also called": get("altTitle") || "", Organization: get("organizationName") || "National Library of Medicine" }, get("FullSummary") || get("snippet"));
+  });
+}
+/* MedlinePlus: its search service does not allow browser pages to read it (CORS).
+   Backup route, both real retrievals: (1) NLM Clinical Tables (an NLM service that does allow
+   browsers) finds the official MedlinePlus topic and link; (2) if the AI is set up, live web
+   search restricted to medlineplus.gov retrieves the topic's text with citations. */
+async function medlineAny(term, ctx, test) {
+  try { const r = await medline(term, ctx, test); return r; }
+  catch (e) { if (e.notFound || !/CORS|network/.test(e.message)) throw e; }
+  const out = []; out.via = ""; let firstErr = null;
+  try {
+    const g = await getJSON(U(ctx, "medlineplus", "https://clinicaltables.nlm.nih.gov/api/conditions/v3/search?maxList=3&df=primary_name,consumer_name&ef=info_link_data,synonyms&terms=" + enc(term)), { noCache: !!test });
+    const d = g.data, names = d[3] || [], ext = d[2] || {}, links = ext.info_link_data || [], syn = ext.synonyms || [];
+    names.forEach((nm, i) => {
+      let ls = links[i]; if (typeof ls === "string") { const p = ls.split(","); ls = p.length > 1 ? [[p[0], p.slice(1).join(",")]] : [[p[0], nm[0]]]; }
+      (Array.isArray(ls) ? ls : []).filter(l => Array.isArray(l) && /medlineplus\.gov|nlm\.nih\.gov\/medlineplus/.test(l[0])).slice(0, 1).forEach(l => {
+        const url = String(l[0]).replace(/^http:/, "https:");
+        out.push(rec("medlineplus", (l[1] || nm[0]) + " — MedlinePlus topic (matched by NLM Clinical Tables)", url, g, { "Medical name": nm[0], "Plain name": nm[1] || "", "Also called": [].concat(syn[i] || []).slice(0, 6).join(", ") }, `NLM lists the condition "${nm[0]}"${nm[1] ? " (" + nm[1] + ")" : ""} with the official MedlinePlus topic page: ${url}.`));
+      });
+    });
+    if (out.length) out.via = "NLM Clinical Tables";
+  } catch (e) { firstErr = e; }
+  if (aiReady() && S.web === "on" && connOn("web")) {
+    try {
+      const w = await aiWebResearch("MedlinePlus health topic on " + term + ": what it is, causes, symptoms, diagnosis, treatment, prevention, when to see a doctor. Use only medlineplus.gov pages.", ["medlineplus.gov"], test ? 1 : 2);
+      w.records.forEach(r => { r.connector = "medlineplus"; r.title = r.title + " — MedlinePlus (retrieved by web search)"; out.push(r); });
+      if (w.records.length) out.via = (out.via ? out.via + " + " : "") + "web retrieval of medlineplus.gov";
+    } catch (e) { firstErr = firstErr || e; }
+  }
+  if (!out.length) throw new Error("MedlinePlus blocks direct browser access and the backup route " + (firstErr ? "failed (" + firstErr.message + ")" : "found no matching topic") + (aiReady() ? "" : " — add your API key to enable the web-retrieval backup"));
+  return out;
+}
+/* DailyMed: its API does not allow browser pages to read it (CORS). openFDA serves the same
+   FDA Structured Product Labels with the same set IDs, so the backup lists the DailyMed labels from there. */
+async function dailymedAny(term, ctx, test) {
+  try {
+    const g = await getJSON(U(ctx, "dailymed", "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?drug_name=" + enc(term) + "&pagesize=3"), { noCache: !!test });
+    return (g.data.data || []).slice(0, 3).map(d => rec("dailymed", d.title, "https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=" + d.setid, g, { "Published": d.published_date, SetID: d.setid }, "DailyMed label: " + d.title + " (published " + d.published_date + ")."));
+  } catch (e) { if (e.notFound || !/CORS|network/.test(e.message)) throw e; }
+  const q = String(term).replace(/"/g, "");
+  let g;
+  try { g = await getJSON(U(ctx, "dailymed", `https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${enc(q)}"+openfda.brand_name:"${enc(q)}"+openfda.substance_name:"${enc(q)}"&limit=3`), { noCache: !!test }); }
+  catch (e) { if (e.notFound) { const r = []; r.via = "openFDA"; return r; } throw new Error("DailyMed blocks direct browser access and the openFDA backup failed (" + e.message + ")"); }
+  const out = (g.data.results || []).filter(d => d.set_id).map(d => { const o = d.openfda || {}; const t = [(o.brand_name || [])[0], (o.generic_name || [])[0]].filter(Boolean).join(" (") + ((o.brand_name || [])[0] && (o.generic_name || [])[0] ? ")" : "");
+    const eff = String(d.effective_time || ""); const date = eff.length === 8 ? eff.slice(0, 4) + "-" + eff.slice(4, 6) + "-" + eff.slice(6) : eff;
+    return rec("dailymed", (t || q) + " — DailyMed label (listed via openFDA)", "https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=" + d.set_id, g, { SetID: d.set_id, "Label effective": date, Manufacturer: (o.manufacturer_name || [])[0] || "", Route: (o.route || []).join(", ") }, `FDA Structured Product Label set ${d.set_id} for ${t || q}${(o.manufacturer_name || [])[0] ? " by " + o.manufacturer_name[0] : ""}, effective ${date}. Full label on DailyMed.`); });
+  out.via = "openFDA, same FDA label IDs";
+  return out;
+}
+async function pubmed(term, ctx, test, n) {
+  const k = (secrets.ncbi ? "&api_key=" + enc(secrets.ncbi) : "") + (S.ncbimail ? "&email=" + enc(S.ncbimail) : "") + "&tool=UIX";
+  const base = U(ctx, "pubmed", "https://eutils.ncbi.nlm.nih.gov/entrez/eutils");
+  let g = await getJSON(base + "/esearch.fcgi?db=pubmed&retmode=json&sort=relevance&retmax=" + n + "&term=" + enc(term + " AND (review[pt] OR systematic review[pt] OR practice guideline[pt])") + k, { noCache: !!test });
+  let ids = g.data.esearchresult.idlist;
+  if (!ids.length) { g = await getJSON(base + "/esearch.fcgi?db=pubmed&retmode=json&sort=relevance&retmax=" + n + "&term=" + enc(term) + k, { noCache: !!test }); ids = g.data.esearchresult.idlist; }
+  if (!ids.length) return [];
+  const s = await getJSON(base + "/esummary.fcgi?db=pubmed&retmode=json&id=" + ids.join(",") + k, { noCache: !!test });
+  return ids.map(id => { const a = s.data.result[id]; if (!a) return null;
+    return rec("pubmed", a.title, "https://pubmed.ncbi.nlm.nih.gov/" + id + "/", s, { PMID: id, Journal: a.fulljournalname || a.source, Published: a.pubdate, Type: (a.pubtype || []).join(", ") },
+      `${a.title} — ${(a.authors || []).slice(0, 3).map(x => x.name).join(", ")}${(a.authors || []).length > 3 ? " et al." : ""}. ${a.fulljournalname || a.source}, ${a.pubdate}. Publication type: ${(a.pubtype || []).join(", ")}. (Abstract not retrieved; title and metadata only.)`); }).filter(Boolean);
+}
+/* Reference links the app can build but does not retrieve (clearly labeled as not retrieved) */
+function referenceLinks(item) {
+  const L = []; const n = item.name || item.search;
+  if (["formula", "cas", "compound", "chemical", "element", "product-ingredient"].includes(item.kind)) {
+    L.push({ title: "NIST Chemistry WebBook — " + n, url: "https://webbook.nist.gov/cgi/cbook.cgi?Name=" + enc(item.cas || n) + "&Units=SI" });
+    L.push({ title: "ECHA chemical search", url: "https://echa.europa.eu/search-for-chemicals" });
+    L.push({ title: "EPA CompTox Dashboard search — " + n, url: "https://comptox.epa.gov/dashboard/search-results?input_type=synonym&inputs=" + enc(item.cas || n) });
+  }
+  if (["disease", "condition", "health", "symptom"].includes(item.kind)) {
+    L.push({ title: "CDC A–Z index", url: "https://www.cdc.gov/health-topics.html" });
+    L.push({ title: "WHO fact sheets", url: "https://www.who.int/news-room/fact-sheets" });
+    L.push({ title: "Orphanet (rare diseases) — " + n, url: "https://www.orpha.net/en/disease/search?search=" + enc(n) });
+  }
+  return L;
+}
+/* =====================================================================
+   Part 3: AI layer — Claude (text + vision), web research with real
+   citations, planning, evidence-bound synthesis, follow-ups, diagrams.
+   ===================================================================== */
+const AUTH_DOMAINS = ["cdc.gov", "who.int", "nih.gov", "nlm.nih.gov", "medlineplus.gov", "fda.gov", "epa.gov", "osha.gov", "niosh.gov", "echa.europa.eu", "nist.gov", "nasa.gov", "usgs.gov", "noaa.gov", "pubchem.ncbi.nlm.nih.gov", "poison.org", "cancer.gov", "ncbi.nlm.nih.gov"];
+function aiReady() { return S.mode === "proxy" ? !!S.proxy : !!secrets.anthropic; }
+
+async function callClaude(body, opts = {}) {
+  const url = S.mode === "proxy" ? S.proxy : "https://api.anthropic.com/v1/messages";
+  const headers = { "content-type": "application/json" };
+  if (S.mode !== "proxy") { headers["x-api-key"] = secrets.anthropic; headers["anthropic-version"] = "2023-06-01"; headers["anthropic-dangerous-direct-browser-access"] = "true"; if (secrets.wsid) headers["anthropic-workspace-id"] = secrets.wsid; }
+  body = Object.assign({ model: S.model, max_tokens: 4000 }, body);
+  let content = [], last, messages = body.messages.slice();
+  for (let turn = 0; turn < 4; turn++) {
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), opts.timeout || 240000);
+    let r;
+    try { r = await fetch(url, { method: "POST", headers, body: JSON.stringify(Object.assign({}, body, { messages })), signal: ctl.signal }); }
+    catch (e) { clearTimeout(tm); throw new Error(e.name === "AbortError" ? "AI request timed out" : "Could not reach the AI service (" + (S.mode === "proxy" ? "check proxy URL" : "network") + ")"); }
+    clearTimeout(tm);
+    let j; try { j = await r.json(); } catch (e) { throw new Error("AI service returned an unreadable response (HTTP " + r.status + ")"); }
+    if (!r.ok) throw new Error("AI service error: " + ((j.error && j.error.message) || ("HTTP " + r.status)));
+    last = j; content = content.concat(j.content || []);
+    if (j.stop_reason === "pause_turn") { messages = messages.concat([{ role: "assistant", content: j.content }]); continue; }
+    break;
+  }
+  return { content, stop_reason: last.stop_reason, usage: last.usage };
+}
+const textOf = res => res.content.filter(b => b.type === "text").map(b => b.text).join("");
+function parseJSONLoose(t) {
+  let s = String(t || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("no JSON object found in AI output");
+  return JSON.parse(s.slice(a, b + 1));
+}
+function webTool(maxUses, domains) {
+  const t = { type: S.webver || "web_search_20250305", name: "web_search", max_uses: maxUses };
+  if (domains && domains.length) t.allowed_domains = domains;
+  return t;
+}
+/* Turns cited web-search answers into source records. Only URLs the search actually returned and cited become sources. */
+function citationsToRecords(res, startNote) {
+  const byUrl = new Map(); const segs = []; const errors = [];
+  res.content.forEach(b => {
+    if (b.type === "web_search_tool_result" && b.content && b.content.type === "web_search_tool_result_error") errors.push(b.content.error_code);
+    if (b.type !== "text") return;
+    const cites = (b.citations || []).filter(c => c.url);
+    const ids = [];
+    cites.forEach(c => {
+      if (!byUrl.has(c.url)) byUrl.set(c.url, rec("web", c.title || c.url, c.url, { retrieved: nowISO(), cached: false }, { Site: (() => { try { return new URL(c.url).hostname; } catch (e) { return ""; } })() }, "", { provenance: "web", quotes: [] }));
+      const r = byUrl.get(c.url); if (c.cited_text && r.quotes.length < 4) r.quotes.push(c.cited_text);
+      ids.push(c.url);
+    });
+    segs.push({ text: b.text, urls: [...new Set(ids)] });
+  });
+  const records = [...byUrl.values()].map(r => { r.text = trunc(r.quotes.join(" … "), 2000); return r; });
+  return { records, segs, errors };
+}
+async function aiWebResearch(query, domains, maxUses) {
+  const res = await callClaude({
+    max_tokens: 3000,
+    system: "You are a research assistant. Use web search to find what official, authoritative sources currently say. Report only facts stated on pages you retrieved, in short plain sentences, each grounded in a citation. If the sources disagree, say so. If nothing authoritative is found, say that plainly. Never state facts from memory in this step.",
+    messages: [{ role: "user", content: "Research request (today is " + new Date().toDateString() + "): " + query }],
+    tools: [webTool(maxUses || Number(S.webmax) || 5, domains)]
+  });
+  const c = citationsToRecords(res);
+  return { records: c.records, summary: c.segs.map(s => s.text).join(""), errors: c.errors };
+}
+
+/* ---------------- Planner: understands the request, reads images, routes to sources ---------------- */
+const PLAN_SCHEMA = `{
+ "emergency": false, "emergency_reason": "",
+ "intent": "one sentence describing what the user wants",
+ "questions": ["each distinct question the user asked"],
+ "items": [{"label":"as written or seen","kind":"element|formula|cas|compound|chemical|product|product-ingredient|disease|condition|symptom|drug|test|term|term-medical|organism|plant|animal|fungus|mineral|material|object|equipment|physics|astronomy|geology|environment|food|technology|historical|math|general|unknown","search":"best database search term","name":"standard name ONLY if certain (e.g. formula H2O -> water), else empty","formula":"","cas":"","element":"symbol if an element","wiki":"best Wikipedia article title or empty","from_image":null}],
+ "image_reads": [{"image_index":0,"readable":true,"visible_text":"exact text visible, or empty","what_is_shown":"objective description","quality_issues":""}],
+ "interaction_question": false,
+ "research_query": "PubMed query or empty",
+ "web_research": {"needed": false, "query": "", "domains": []}
+}`;
+async function aiPlan(text, images, category) {
+  const content = [];
+  images.forEach((im, i) => { content.push({ type: "text", text: "Image " + i + ":" }); content.push({ type: "image", source: { type: "base64", media_type: im.media, data: im.b64 } }); });
+  content.push({ type: "text", text: `User input:\n"""${text || "(no text — images only)"}"""\nUser-selected category: ${category}\nReturn ONLY JSON matching this schema:\n${PLAN_SCHEMA}` });
+  const res = await callClaude({
+    max_tokens: 2500,
+    system: `You are the routing planner for a scientific identification and research app. Split the request into the distinct subjects to look up. Rules:
+- For images, read visible text exactly (labels, ingredients, warnings, model numbers). If a product label lists ingredients, add each active/hazardous ingredient as its own item with kind "product-ingredient". Never guess a chemical identity from the appearance of a powder, liquid or crystal — use kind "unknown" and describe it.
+- For a chemical formula, give "name" only when the formula unambiguously denotes a well-known substance.
+- Mark emergency true only for a described, current threat to someone's life or health (poisoning, can't breathe, chest pain, severe bleeding, suicidal statements, gas leak, fire, chemical in eyes, unconscious person).
+- web_research.needed = true when current official guidance matters (diseases, treatments, vaccines, outbreaks, regulations, product recalls, hazards of products, unknown subjects). Choose domains from: ${AUTH_DOMAINS.join(", ")} (an empty list allows any site).
+- Do not answer the question here. Output JSON only.`,
+    messages: [{ role: "user", content }]
+  });
+  return parseJSONLoose(textOf(res));
+}
+
+/* ---------------- Synthesis: evidence-bound structured report ---------------- */
+const REPORT_SCHEMA = `{
+ "title": "", "overview": "2-4 plain-language sentences",
+ "emergency": {"is_emergency": false, "message": ""},
+ "image_observations": [{"image_index":0,"description":"objective","visible_text":"","distinguishing_features":[""],"quality_issues":""}],
+ "items": [{
+   "name":"", "aliases":[""], "scientific_name":"", "category":"", "subcategory":"",
+   "identifiers":[{"label":"","value":"","sources":["S1"]}],
+   "summary":"",
+   "confidence":{"level":"Confirmed|High|Moderate|Low|Not identified","basis":""},
+   "candidates":[{"name":"","likelihood":"High|Moderate|Low","supporting":[""],"contradicting":[""]}],
+   "appearance":{"description":"","features":[""],"sources":[]},
+   "composition":{"heading":"Composition|Cause|Materials & mechanism|Origin","points":[{"text":"","sources":[],"basis":"retrieved|general|inference"}]},
+   "function":{"plain":"","technical":"","sources":[]},
+   "safety":{"level":"Critical|High|Moderate|Low|Unknown|Not applicable","reason":"","conditions":"","hazards":[{"text":"","sources":[],"basis":"retrieved|general|inference"}],"precautions":[""],"warning_signs":[""]}
+ }],
+ "interactions":{"applicable":false,"summary":"","equation":"","pairs":[{"between":["",""],"type":"chemical reaction|physical mixture|biological|no known interaction|insufficient data","description":"","hazard":"Critical|High|Moderate|Low|Unknown|Not applicable","conditions":"","sources":[],"basis":"retrieved|general|inference"}]},
+ "answers":[{"question":"","answer":"","sources":[]}],
+ "calculations":[{"title":"","steps":[""],"result":""}],
+ "evidence":{"verified":[{"text":"","sources":[]}],"inferred":[""],"uncertain":[""],"missing":[""],"conflicts":[""]},
+ "next_steps":[""]
+}`;
+const SYNTH_RULES = `You write evidence-based reports for the Universal Intelligence Explorer. Today is ${new Date().toDateString()}.
+NON-NEGOTIABLE RULES
+1. Ground facts in the numbered SOURCES. Put source ids (e.g. "S2") in the "sources" array beside each claim they support. Never cite an id that is not listed, and never invent a source, URL, study, identifier, property, or database result.
+2. Each point carries "basis": "retrieved" (stated in a cited source), "general" (well-established textbook knowledge not in the sources), or "inference" (your reasoning). Prefer retrieved. Use general/inference sparingly and honestly.
+3. Never invent chemical identities, reaction products, disease causes, diagnoses, properties or dosages. Do not give any medication dose. Do not diagnose a person from symptoms or photos — give educational possibilities and when to see a clinician.
+4. Appearance cannot establish a chemical's identity, purity, toxicity or safety. An unknown powder/liquid stays "Not identified"; recommend safe verification (labeled container, SDS, supplier, professional lab, poison control) — never tasting, smelling, mixing or heating it.
+5. Do not call anything safe because no hazard data was found; use "Unknown". Distinguish intrinsic hazard from risk under stated conditions. Risk labels are communication aids, not official classifications — explain each.
+6. With several items: identify each separately. Do not infer a reaction just because formulas appear together; distinguish reactions, physical mixtures and biological interactions; state conditions and concentrations.
+7. A reaction with no stated products: give the established product only if well established (basis "general" if not in sources) and state required conditions. Use the provided BALANCED EQUATION results; do not re-balance differently.
+8. If an input cannot be reliably identified, say so plainly and list what information would help.
+9. If a source was unavailable, say the information from it is missing — never fill the gap as if it had been retrieved.
+10. If the input describes a current emergency, set emergency.is_emergency true with short, direct instructions (call 911; US Poison Help 1-800-222-1222) and keep the rest brief.
+11. Use plain language first, technical detail second. Leave arrays empty rather than padding. Omit sections that do not apply ("Not applicable").
+Output ONLY one JSON object matching the schema.`;
+function sourcesBlock(sources) {
+  return sources.map(s => `[${s.id}] (${s.provenance}${s.lowAuthority ? ", community-edited" : ""}) ${s.title}\nURL: ${s.url || "built-in dataset"}\nRetrieved: ${s.retrieved}\nFacts: ${JSON.stringify(s.facts)}\nText: ${s.text}`).join("\n\n");
+}
+async function aiSynthesize(A, images) {
+  const content = [];
+  images.forEach((im, i) => { content.push({ type: "text", text: "Image " + i + " (" + im.name + "):" }); content.push({ type: "image", source: { type: "base64", media_type: im.media, data: im.b64 } }); });
+  const detailMap = { concise: "Keep it concise: short summaries, only the most important points.", standard: "Standard depth.", detailed: "Detailed: include technical depth, mechanisms and calculations where useful." };
+  const focusMap = { all: "Cover every applicable section.", identity: "Focus on identification; keep other sections minimal.", safety: "Emphasize hazards, precautions and warning signs.", interactions: "Emphasize interactions between the items.", evidence: "Emphasize the research evidence and its strength." };
+  content.push({ type: "text", text:
+`USER INPUT:\n"""${A.input.text || "(images only)"}"""
+Category chosen: ${A.input.category}. ${detailMap[A.input.detail] || ""} ${focusMap[A.input.focus] || ""}
+PLAN: ${JSON.stringify({ intent: A.plan.intent, questions: A.plan.questions, items: A.plan.items, image_reads: A.plan.image_reads })}
+LOCAL CHEMISTRY ENGINE RESULTS (exact arithmetic on stated formulas): ${JSON.stringify(A.engine)}
+UNAVAILABLE SOURCES (report as missing, do not fill in): ${JSON.stringify(A.unavailable.map(u => u.connector + " for '" + u.item + "': " + u.error))}
+SOURCES:\n${sourcesBlock(A.sources) || "(none retrieved)"}
+\nReturn ONLY JSON matching:\n${REPORT_SCHEMA}` });
+  const res = await callClaude({ max_tokens: Number(S.tokens) || 12000, system: SYNTH_RULES, messages: [{ role: "user", content }] });
+  return validateReport(parseJSONLoose(textOf(res)), A.sources);
+}
+const RISK = ["Critical", "High", "Moderate", "Low", "Unknown", "Not applicable"];
+function validateReport(r, sources) {
+  const ids = new Set(sources.map(s => s.id)); const bad = new Set();
+  const fixSrc = arr => (Array.isArray(arr) ? arr : []).filter(x => { const ok = ids.has(String(x)); if (!ok) bad.add(String(x)); return ok; });
+  const walk = o => { if (Array.isArray(o)) return o.forEach(walk); if (o && typeof o === "object") { for (const k in o) { if (k === "sources") o[k] = fixSrc(o[k]); else walk(o[k]); } } };
+  if (!r || typeof r !== "object") throw new Error("AI report was not an object");
+  r.items = Array.isArray(r.items) ? r.items : [];
+  r.items.forEach(it => { it.safety = it.safety || {}; if (!RISK.includes(it.safety.level)) it.safety.level = "Unknown"; it.confidence = it.confidence || { level: "Low", basis: "" }; });
+  r.interactions = r.interactions || { applicable: false, pairs: [] }; (r.interactions.pairs || []).forEach(p => { if (!RISK.includes(p.hazard)) p.hazard = "Unknown"; });
+  r.evidence = r.evidence || {};
+  walk(r);
+  r._validation = { removedCitations: [...bad] };
+  return r;
+}
+
+/* ---------------- Follow-ups (with optional live web research) ---------------- */
+async function aiFollowUp(A, question) {
+  const history = (A.thread || []).slice(-8).map(m => ({ role: m.role, content: m.text }));
+  const ctxText = `ANALYSIS CONTEXT\nOriginal input: ${A.input.text}\nReport (JSON): ${JSON.stringify(A.report || {}).slice(0, 30000)}\nSOURCES:\n${sourcesBlock(A.sources).slice(0, 30000)}\nUnavailable: ${JSON.stringify(A.unavailable)}`;
+  const tools = (S.web === "on") ? [webTool(3, [])] : undefined;
+  const res = await callClaude({
+    max_tokens: 3000,
+    system: SYNTH_RULES.split("Output ONLY")[0] + "\nYou are answering a follow-up question about an existing analysis. Answer in short plain paragraphs or simple '- ' bullet lines (no markdown headings, no tables). Cite existing sources as [S1], [S2]. If you need current official information that is not in the sources, use web search; those citations are attached automatically. Say plainly when something is unknown.",
+    messages: [{ role: "user", content: ctxText }, { role: "assistant", content: "Understood. I have the analysis and its sources." }, ...history, { role: "user", content: question }],
+    tools
+  });
+  const c = citationsToRecords(res);
+  const added = c.records.map(r => { r.id = "S" + (A.sources.length + 1); A.sources.push(r); return r; });
+  const urlToId = Object.fromEntries(A.sources.filter(s => s.url).map(s => [s.url, s.id]));
+  const text = c.segs.map(s => s.text + (s.urls.length ? " " + s.urls.map(u => "[" + urlToId[u] + "]").join("") : "")).join("");
+  return { text: text.trim(), added: added.length };
+}
+async function aiDiagram(A, item) {
+  const res = await callClaude({ max_tokens: 6000,
+    system: "You draw clear, labeled, scientifically accurate explanatory diagrams as standalone SVG (viewBox 0 0 800 500, white background, dark text, simple shapes and arrows, readable labels, no scripts, no external references, no raster images). Draw schematics only — never imitate a photograph. Output only the SVG.",
+    messages: [{ role: "user", content: "Draw an explanatory schematic diagram for: " + item.name + ". Context: " + (item.summary || "") + " " + JSON.stringify(item.composition || {}).slice(0, 2500) }] });
+  const t = textOf(res); const a = t.indexOf("<svg"), b = t.lastIndexOf("</svg>");
+  if (a < 0 || b < 0) throw new Error("no SVG returned");
+  let svg = t.slice(a, b + 6).replace(/<script[\s\S]*?<\/script>/gi, "").replace(/\son\w+="[^"]*"/gi, "").replace(/(href|xlink:href)="(?!#)[^"]*"/gi, "");
+  return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg)));
+}
+/* =====================================================================
+   Part 4: pipeline, report rendering, history, periodic table, settings,
+   self-tests, guide.
+   ===================================================================== */
+const ROUTES = {
+  element: ["elements", "pcperiodic", "wikipedia"],
+  formula: ["pubchem", "comptox", "wikipedia"], cas: ["pubchem", "comptox", "wikipedia"], compound: ["pubchem", "comptox", "wikipedia"],
+  chemical: ["pubchem", "comptox", "wikipedia"], "product-ingredient": ["pubchem", "comptox"], "invalid-id": ["pubchem"],
+  disease: ["medlineplus", "pubmed", "ctgov", "wikipedia"], condition: ["medlineplus", "pubmed", "ctgov", "wikipedia"], symptom: ["medlineplus", "wikipedia"],
+  drug: ["openfda", "dailymed", "medlineplus", "pubchem", "pubmed"], test: ["medlineplus", "wikipedia"],
+  term: ["dictionary", "wikipedia"], "term-medical": ["medlineplus", "dictionary", "wikipedia"],
+  unknown: [], name: ["pubchem", "medlineplus", "dictionary", "wikipedia"]
+};
+const CAT_KIND = { chemistry: "chemical", element: "element", health: "disease", drug: "drug", term: "term" };
+let current = null;      // the analysis on screen
+let pending = [];        // prepared images for the next analysis
+
+/* ---------------- images ---------------- */
+async function prepareImage(file) {
+  if (!file || !/^image\//.test(file.type || "")) throw new Error("not an image file");
+  if (file.size > 25e6) throw new Error("file is larger than 25 MB");
+  let bmp;
+  try { bmp = await createImageBitmap(file); }
+  catch (e) { bmp = await new Promise((res, rej) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => { res(im); URL.revokeObjectURL(u); }; im.onerror = () => { rej(new Error("the image could not be decoded — it may be corrupted or in an unsupported format (try JPEG or PNG)")); URL.revokeObjectURL(u); }; im.src = u; }); }
+  const w = bmp.width, h = bmp.height; if (!w || !h) throw new Error("the image has no readable pixels");
+  const sc = Math.min(1, 1568 / Math.max(w, h)); const c = document.createElement("canvas"); c.width = Math.round(w * sc); c.height = Math.round(h * sc);
+  const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(bmp, 0, 0, c.width, c.height);
+  const url = c.toDataURL("image/jpeg", 0.88);
+  return { name: file.name || "image", media: "image/jpeg", b64: url.split(",")[1], preview: url, w: c.width, h: c.height, lowRes: Math.max(w, h) < 300 };
+}
+function renderThumbs() {
+  $("#thumbs").innerHTML = pending.map((p, i) => `<div class="thumb ${p.error ? "err" : ""}">${p.preview ? `<img src="${p.preview}" alt="">` : `<div style="height:72px;display:grid;place-items:center">⚠</div>`}<div class="cap" title="${esc(p.error || p.name)}">${esc(p.error ? "Error: " + p.error : p.name)}</div><button class="x" data-i="${i}" aria-label="Remove">×</button>${p.error ? `<button class="btn sm" data-retry="${i}" style="width:100%;border-radius:0">Retry</button>` : ""}</div>`).join("");
+}
+async function addFiles(files) {
+  for (const f of Array.from(files)) {
+    if (pending.length >= 6) { toast("Up to 6 photos per analysis"); break; }
+    const slot = { name: f.name, file: f }; pending.push(slot); renderThumbs();
+    try { Object.assign(slot, await prepareImage(f)); if (slot.lowRes) toast(f.name + " is very small — identification may be unreliable"); }
+    catch (e) { slot.error = e.message; }
+    renderThumbs();
+  }
+}
+
+/* ---------------- pipeline steps UI ---------------- */
+function stepper(quiet) {
+  if (quiet) return { add: () => ({ set() { } }) };
+  $("#stepsCard").classList.remove("hide"); $("#steps").innerHTML = "";
+  return { add(label) { const li = document.createElement("li"); li.innerHTML = `<span class="dot run"></span><div><b>${esc(label)}</b> <span class="muted small"></span></div>`; $("#steps").appendChild(li);
+    return { set(st, detail) { li.querySelector(".dot").className = "dot " + st; li.querySelector(".muted").textContent = detail ? "— " + detail : ""; } }; } };
+}
+function showEmergency(msg) {
+  $("#emergBox").innerHTML = `<div class="emerg" role="alert"><h2>If this is happening now, get help immediately</h2>
+  <p><b>Call 911</b> for anyone who is unconscious, not breathing, having trouble breathing, having a seizure, chest pain, severe bleeding, or is in danger.</p>
+  <p><b>Possible poisoning or chemical exposure:</b> call US Poison Help <b>1-800-222-1222</b> (free, 24/7) — do not wait for symptoms, and do not make the person vomit unless told to. For chemicals in the eyes or on skin, rinse with plenty of running water while you call.</p>
+  <p><b>Thoughts of suicide:</b> call or text <b>988</b> (US).</p>${msg ? `<p class="small">${esc(msg)}</p>` : ""}<p class="small">The analysis below is general information only and is not a substitute for emergency help.</p></div>`;
+}
+
+/* ---------------- main analysis ---------------- */
+async function runAnalysis(input, images, opts = {}) {
+  const st = stepper(opts.quiet);
+  const A = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: nowISO(), version: UIX_VERSION,
+    input: { text: input.text, category: input.category, detail: input.detail, focus: input.focus, imageNames: images.map(i => i.name) },
+    imagesPreview: images.map(i => i.preview), plan: null, engine: {}, sources: [], unavailable: [], links: [], report: null, mode: "", thread: [], notes: [] };
+  const useAI = !opts.noAI && aiReady();
+  A.mode = useAI ? "ai" : "retrieval-only";
+  /* 1. emergency first */
+  const em = detectEmergency(input.text);
+  if (em) { A.emergency = true; if (!opts.quiet) showEmergency(); }
+  /* 2. plan */
+  const local = localClassify(input.text);
+  let s = st.add(useAI ? "Understanding the request" + (images.length ? " and reading " + images.length + " photo(s)" : "") : "Classifying input (built-in rules)");
+  if (useAI) {
+    try { A.plan = await aiPlan(input.text, images, input.category); s.set("ok", (A.plan.items || []).length + " subject(s) found"); }
+    catch (e) { s.set("fail", "AI planner unavailable (" + e.message + ") — using built-in rules"); A.notes.push("AI planner failed: " + e.message); }
+  }
+  if (!A.plan) {
+    A.plan = { intent: "", questions: [], items: local.items.map(x => ({ label: x.text, kind: x.kind, search: x.search, name: "", formula: x.formula || "", cas: x.kind === "cas" ? x.text : "", element: x.element || "", wiki: "" })), image_reads: [], web_research: { needed: false } };
+    if (input.category !== "auto" && CAT_KIND[input.category]) A.plan.items.forEach(it => { if (it.kind === "name") it.kind = CAT_KIND[input.category]; });
+    if (!useAI) s.set("ok", A.plan.items.length + " subject(s): " + A.plan.items.map(i => i.kind).join(", "));
+    if (images.length && !useAI) A.notes.push("Photos were not analyzed: image analysis needs the AI service (add your API key in Settings). Nothing was inferred from the file names.");
+  }
+  if (A.plan.emergency && !A.emergency) { A.emergency = true; if (!opts.quiet) showEmergency(A.plan.emergency_reason); }
+  A.plan.items = (A.plan.items || []).filter(x => x && (x.search || x.label)).slice(0, 12);
+  A.plan.items.forEach(it => { it.search = it.search || it.label; if (!it.formula && looksLikeFormula(it.label)) it.formula = it.label; if (it.kind === "formula" && findElement(it.label) && !/\d/.test(it.label) && /^[A-Z][a-z]?$/.test(it.label)) { it.kind = "element"; it.element = it.label; } if (it.kind === "element" && !it.element) { const e = findElement(it.search) || findElement(it.label); if (e) it.element = e.sym; } });
+
+  /* 3. local chemistry engine */
+  s = st.add("Chemistry engine (exact arithmetic)");
+  try {
+    const eq = local.equation || splitEquation(input.text);
+    const eng = A.engine; eng.formulas = [];
+    if (eq && eq.reactants.length) {
+      const all = eq.reactants.concat(eq.products).map(x => stripState(stripCoef(x)));
+      if (all.every(looksLikeFormula)) {
+        eng.equation = { reactants: eq.reactants, products: eq.products };
+        if (eq.products.length) { const b = balanceEquation(eq.reactants, eq.products); eng.equation.balance = b; }
+        else eng.equation.note = "No products were stated. The engine never invents products; established products (if any) must come from sources or well-established chemistry, with conditions.";
+      }
+    }
+    A.plan.items.forEach(it => { const f = it.formula || (it.kind === "formula" ? it.label : ""); if (f && looksLikeFormula(f)) { const c = parseFormula(f); const m = molarMass(c); eng.formulas.push({ formula: f, hill: hillFormula(c), atoms: c, molarMass: +m.value.toFixed(3), approximate: m.approx }); } if (it.kind === "invalid-id" || (/^\d{2,7}-\d{2}-\d$/.test(it.label || "") && !validCAS(it.label))) { it.kind = "invalid-id"; eng.invalidIds = (eng.invalidIds || []).concat(it.label + " has the shape of a CAS Registry Number but its check digit is wrong, so it is not a valid CAS number."); } });
+    if (eng.formulas.length) A.sources.push(rec("engine", "UIX chemistry engine — calculated from the entered formula(s)", "", null, Object.fromEntries(eng.formulas.map(f => [f.formula, "Hill " + f.hill + ", molar mass " + f.molarMass + " g/mol" + (f.approximate ? " (approx.; contains elements with no standard atomic weight)" : "")])), "Calculated from built-in IUPAC standard atomic weights."));
+    if (eng.equation && eng.equation.balance) A.sources.push(rec("engine", "UIX equation balancer", "", null, { Result: eng.equation.balance.ok ? eng.equation.balance.equation : eng.equation.balance.reason }, "Exact balancing of the stated species (atom conservation)."));
+    s.set("ok", [eng.formulas.length ? eng.formulas.length + " formula(s)" : "", eng.equation ? (eng.equation.balance ? (eng.equation.balance.ok ? "balanced" : "not balanceable") : "reaction without stated products") : "", eng.invalidIds ? "invalid identifier detected" : ""].filter(Boolean).join(", ") || "nothing to calculate");
+  } catch (e) { s.set("fail", e.message); A.notes.push("Chemistry engine: " + e.message); }
+
+  /* 4. live connectors */
+  const jobs = [];
+  A.plan.items.forEach((it, idx) => {
+    let route = (ROUTES[it.kind] || (it.kind === "product" ? ["wikipedia"] : ["wikipedia"])).slice();
+    if (input.focus === "evidence" && !route.includes("pubmed") && !["element", "formula", "cas", "invalid-id", "unknown"].includes(it.kind)) route.push("pubmed");
+    if (it.research_query === undefined) it.research_query = A.plan.research_query || "";
+    route.filter(id => CONN[id] && connOn(id) && !(CONN[id].needsKey && !secrets[CONN[id].needsKey])).forEach(id => {
+      const step = st.add(CONN[id].name + " — “" + trunc(it.search, 50) + "”");
+      jobs.push((async () => {
+        try { const rs = await CONN[id].run(it, { forceFail: opts.forceFail }); rs.forEach(r => { r.itemIndex = idx; }); A.sources.push(...rs); step.set(rs.length ? "ok" : "skip", rs.length ? rs.length + " record(s)" + (rs.some(r => r.provenance === "cached") ? " (cached)" : "") : "no matching record");
+          if (!rs.length) A.unavailable.push({ connector: CONN[id].name, item: it.search, error: "no matching record", notFound: true }); }
+        catch (e) { step.set("fail", e.message); A.unavailable.push({ connector: CONN[id].name, item: it.search, error: e.message }); }
+      })());
+    });
+    A.links.push(...referenceLinks(it));
+  });
+  await Promise.all(jobs);
+
+  /* 5. live authoritative web research */
+  const wr = A.plan.web_research || {};
+  if (useAI && S.web === "on" && connOn("web") && wr.needed && wr.query) {
+    const step = st.add("Authoritative web research — " + trunc(wr.query, 60));
+    try { const r = await aiWebResearch(wr.query, (wr.domains || []).filter(d => /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(d)), Number(S.webmax)); A.sources.push(...r.records);
+      step.set(r.records.length ? "ok" : "skip", r.records.length + " cited page(s)" + (r.errors.length ? " — search errors: " + r.errors.join(", ") : ""));
+      if (!r.records.length) A.unavailable.push({ connector: "Web research", item: wr.query, error: r.errors.length ? r.errors.join(", ") : "no authoritative page cited" }); }
+    catch (e) { step.set("fail", e.message); A.unavailable.push({ connector: "Web research", item: wr.query, error: e.message }); }
+  }
+  /* de-duplicate and number sources */
+  const seen = new Set(); A.sources = A.sources.filter(r => { const k = (r.url || "") + "|" + r.title; if (seen.has(k)) return false; seen.add(k); return true; });
+  A.sources.forEach((r, i) => r.id = "S" + (i + 1));
+  const seenL = new Set(); A.links = A.links.filter(l => !seenL.has(l.url) && seenL.add(l.url));
+
+  /* 6. synthesis */
+  if (useAI) {
+    s = st.add("Writing the evidence-based report");
+    try { A.report = await aiSynthesize(A, images); s.set("ok", A.report._validation.removedCitations.length ? "removed " + A.report._validation.removedCitations.length + " invalid citation(s)" : "citations validated"); }
+    catch (e) { s.set("fail", e.message + " — showing retrieved records only"); A.notes.push("AI report failed: " + e.message); A.mode = "retrieval-only"; }
+  }
+  if (!A.report) A.report = retrievalOnlyReport(A);
+  /* independent check of any equation the AI wrote */
+  const qe = A.report.interactions && A.report.interactions.equation;
+  if (qe) { try { const sp = splitEquation(qe.replace(/\d+\s+(?=[A-Z(])/g, "")); if (sp && sp.products.length) { const b = balanceEquation(sp.reactants, sp.products); A.report.interactions.equationCheck = b.ok ? "Checked by the UIX balancer: " + b.equation : "UIX balancer could not confirm this equation: " + b.reason; } } catch (e) { A.report.interactions.equationCheck = "UIX balancer could not parse this equation."; } }
+  if (A.report.emergency && A.report.emergency.is_emergency && !opts.quiet) showEmergency(A.report.emergency.message);
+  return A;
+}
+function retrievalOnlyReport(A) {
+  const R = { title: A.input.text ? trunc(A.input.text, 80) : "Photo analysis", overview: aiReady() ? "The AI report could not be produced, so this page lists the records retrieved from each source. Nothing has been summarized or inferred." : "Retrieval-only mode: AI synthesis is off (no API key in Settings). This page shows only records retrieved from the sources — no AI interpretation, risk rating or photo analysis.",
+    items: [], interactions: { applicable: false, pairs: [] }, answers: [], calculations: [], evidence: { verified: [], inferred: [], uncertain: [], missing: [], conflicts: [] }, next_steps: [] };
+  A.plan.items.forEach((it, idx) => {
+    const rs = A.sources.filter(s => s.itemIndex === idx);
+    const main = rs.find(r => r.connector === "pubchem" && r.cid) || rs.find(r => r.connector === "elements") || rs.find(r => !r.lowAuthority) || rs[0];
+    const ids = []; rs.forEach(r => ["PubChem CID", "CAS (from synonyms)", "InChIKey", "Atomic number", "Symbol", "Molecular formula", "NCT", "PMID", "DTXSID"].forEach(k => { if (r.facts[k] && r.facts[k] !== "not listed") ids.push({ label: k, value: String(r.facts[k]), sources: [r.id] }); }));
+    const ghs = rs.find(r => /GHS hazard classification/.test(r.title));
+    const ambiguous = rs.some(r => r.facts && r.facts["Formula ambiguity"]);
+    R.items.push({ name: (main && (main.facts.Name || main.title.split(" — ")[0])) || it.search, aliases: [], category: it.kind, identifiers: ids.slice(0, 10),
+      summary: main ? trunc(main.text, 500) : "No source returned a record for this item.",
+      confidence: { level: !main ? "Not identified" : (it.kind === "unknown" ? "Not identified" : ambiguous ? "Moderate" : (main.connector === "pubchem" || main.connector === "elements") ? "High" : "Moderate"), basis: !main ? "No database match" : "Matched record: " + main.title + (ambiguous ? " (several records share this formula)" : "") },
+      candidates: [], appearance: { description: "", features: [] }, composition: { heading: "Retrieved facts", points: rs.filter(r => r !== ghs).map(r => ({ text: r.title + ": " + trunc(r.text, 260), sources: [r.id], basis: "retrieved" })) },
+      function: { plain: "", technical: "" },
+      safety: { level: "Unknown", reason: "No AI risk assessment was made. " + (ghs ? "Official GHS hazard statements are listed below." : "No hazard classification was retrieved — this does not mean it is safe."), conditions: "", hazards: ghs ? ghs.text.replace(/^GHS hazard statements: /, "").split(" | ").slice(0, 12).map(t => ({ text: t, sources: [ghs.id], basis: "retrieved" })) : [], precautions: [], warning_signs: [] } });
+    if (!main) { const errs = A.unavailable.filter(u => u.item === it.search); const unreachable = errs.length && errs.every(u => !u.notFound);
+      R.evidence.missing.push(unreachable ? "“" + it.search + "” could not be checked — every source for it was unreachable. Try again later or check Settings → Data connectors." : "No record found for “" + it.search + "”. More detail would help — e.g. a full product name, a CAS number, a clearer label photo, or the context where you found it.");
+      if (unreachable) R.items[R.items.length - 1].confidence.basis = "Sources unreachable — not checked"; }
+  });
+  const eq = A.engine.equation;
+  if (eq) { R.interactions.applicable = true; R.interactions.summary = eq.note || ""; if (eq.balance) { if (eq.balance.ok) R.interactions.equation = eq.balance.equation; else R.interactions.summary = eq.balance.reason; } }
+  (A.engine.invalidIds || []).forEach(t => R.evidence.missing.push(t));
+  (A.engine.formulas || []).forEach(f => R.calculations.push({ title: "Molar mass of " + f.formula, steps: Object.entries(f.atoms).map(([k, n]) => `${k}: ${n} × ${EL_BY_SYM[k].massText} = ${(n * EL_BY_SYM[k].mass).toFixed(3)} g/mol`), result: f.molarMass + " g/mol" + (f.approximate ? " (approximate)" : "") }));
+  A.unavailable.filter(u => !u.notFound).forEach(u => R.evidence.missing.push(u.connector + " was unavailable for “" + u.item + "” (" + u.error + ")."));
+  A.notes.forEach(n => R.evidence.uncertain.push(n));
+  if (!aiReady()) R.next_steps.push("Add your Anthropic API key in Settings for photo analysis, plain-language explanations, risk assessment and interactions.");
+  return R;
+}
+
+/* ---------------- rendering ---------------- */
+const BASIS = { general: '<span class="badge b-ai" title="Well-established knowledge stated by the AI, not taken from a retrieved source">General knowledge</span>', inference: '<span class="badge b-inf" title="Reasoning by the AI — treat as unverified">Inference</span>' };
+const PROV = { live: '<span class="badge b-live">Live query</span>', cached: '<span class="badge b-live">Live query (cached)</span>', local: '<span class="badge b-local">Built-in data</span>', web: '<span class="badge b-web">Web research</span>' };
+function cites(A, arr) { return (arr || []).map(id => `<a class="cite" href="#${A.id}-${esc(id)}">[${esc(id)}]</a>`).join(""); }
+function pt(A, p) { if (p == null) return ""; if (typeof p === "string") return esc(p); return esc(p.text) + " " + cites(A, p.sources) + (p.basis && BASIS[p.basis] && !(p.sources || []).length ? " " + BASIS[p.basis] : p.basis === "inference" ? " " + BASIS.inference : ""); }
+function list(A, arr, cls = "tight") { arr = (arr || []).filter(x => x && (typeof x === "string" ? x.trim() : x.text)); return arr.length ? `<ul class="${cls}">${arr.map(x => `<li>${pt(A, x)}</li>`).join("")}</ul>` : ""; }
+function riskBadge(l) { return `<span class="risk r-${l === "Not applicable" ? "NA" : esc(l)}">${esc(l)}</span>`; }
+function sec(title, body, open, extra = "") { return body && String(body).trim() ? `<details class="sec" ${open ? "open" : ""}><summary>${title}${extra}</summary><div class="in">${body}</div></details>` : ""; }
+function richText(A, t) {
+  return esc(t).split(/\n/).map(l => l.match(/^\s*[-•]\s+/) ? "<li>" + l.replace(/^\s*[-•]\s+/, "") + "</li>" : l ? "<p style='margin:4px 0'>" + l + "</p>" : "").join("")
+    .replace(/(<li>.*?<\/li>)+/g, m => "<ul class='tight'>" + m + "</ul>").replace(/\[(S\d+)\]/g, (m, id) => `<a class="cite" href="#${A.id}-${id}">[${id}]</a>`).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+}
+function renderAnalysis(A, target) {
+  const R = A.report || {}; const el = target || $("#report");
+  const imgs = (A.imagesPreview || []).filter(Boolean);
+  let h = `<div class="card"><div class="row" style="align-items:flex-start"><div style="flex:3 1 320px"><h2 style="margin-bottom:4px">${esc(R.title || "Analysis")}</h2>
+   <div class="chips" style="margin-bottom:8px"><span class="chip">${A.mode === "ai" ? "AI report + live sources" : "Retrieval-only"}</span><span class="chip">${esc(fmtDate(A.created))}</span><span class="chip">${A.sources.length} source record(s)</span>${A.unavailable.filter(u => !u.notFound).length ? `<span class="chip" style="color:var(--bad)">${A.unavailable.filter(u => !u.notFound).length} source(s) unavailable</span>` : ""}</div>
+   <p style="margin:0">${esc(R.overview || "")}</p></div>
+   <div class="noprint" style="flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" data-act="md">Markdown</button><button class="btn sm" data-act="html">HTML</button><button class="btn sm" data-act="json">JSON</button><button class="btn sm" data-act="print">Print / PDF</button></div></div>
+   ${A.input.text ? `<p class="small muted" style="margin:10px 0 0">Input: ${esc(trunc(A.input.text, 400))}</p>` : ""}</div>`;
+  if (R.emergency && R.emergency.is_emergency) h += `<div class="emerg"><h2>Urgent</h2><p>${esc(R.emergency.message)}</p></div>`;
+  if (imgs.length || (R.image_observations || []).length) {
+    let b = `<div class="refimgs">${imgs.map((src, i) => `<figure class="ref"><img src="${src}" alt="Uploaded image ${i}"><figcaption>Your photo ${i}: ${esc(A.input.imageNames[i] || "")}</figcaption></figure>`).join("")}</div>`;
+    (R.image_observations || []).forEach(o => { b += `<h3>Photo ${esc(o.image_index)}</h3><p>${esc(o.description)}</p>${o.visible_text ? `<p><b>Visible text:</b> <span class="mono">${esc(o.visible_text)}</span></p>` : ""}${list(A, o.distinguishing_features)}${o.quality_issues ? `<p class="warnc small">Image limitation: ${esc(o.quality_issues)}</p>` : ""}`; });
+    h += `<div class="card">${sec("Photo observations", b, true)}</div>`;
+  }
+  (R.items || []).forEach((it, ii) => {
+    const refImgs = A.sources.filter(s => s.image && (A.plan.items.length <= 1 || s.itemIndex === ii || s.itemIndex == null)).map(s => s.image);
+    const idb = `<dl class="kv"><dt>Name</dt><dd><b>${esc(it.name)}</b></dd>${(it.aliases || []).length ? `<dt>Also called</dt><dd>${esc(it.aliases.join(", "))}</dd>` : ""}${it.scientific_name ? `<dt>Scientific / technical</dt><dd>${esc(it.scientific_name)}</dd>` : ""}<dt>Category</dt><dd>${esc([it.category, it.subcategory].filter(Boolean).join(" › "))}</dd>
+      ${(it.identifiers || []).map(x => `<dt>${esc(x.label)}</dt><dd class="mono">${esc(x.value)} ${cites(A, x.sources)}</dd>`).join("")}
+      <dt>Confidence</dt><dd><span class="conf">${esc(it.confidence.level)}</span> — ${esc(it.confidence.basis)}</dd></dl>
+      ${it.summary ? `<p>${esc(it.summary)}</p>` : ""}
+      ${(it.candidates || []).length ? `<h3>Possible matches</h3><table class="t"><thead><tr><th>Candidate</th><th>Likelihood</th><th>Supports</th><th>Argues against</th></tr></thead><tbody>${it.candidates.map(c => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.likelihood)}</td><td>${list(A, c.supporting)}</td><td>${list(A, c.contradicting)}</td></tr>`).join("")}</tbody></table>` : ""}`;
+    const ap = it.appearance || {};
+    const apb = `${ap.description ? `<p>${esc(ap.description)} ${cites(A, ap.sources)}</p>` : ""}${list(A, ap.features)}
+      ${refImgs.length ? `<div class="refimgs">${refImgs.map(im => `<figure class="ref"><img src="${esc(im.src)}" alt="" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>${esc(im.caption)}${im.link ? ` — <a href="${esc(im.link)}" target="_blank" rel="noopener">source</a>` : ""}</figcaption></figure>`).join("")}</div>` : ""}
+      <div class="noprint" style="margin-top:8px"><button class="btn sm" data-diagram="${ii}" ${aiReady() ? "" : "disabled title='Needs API key'"}>Generate explanatory diagram (AI)</button></div><div id="${A.id}-diag-${ii}"></div>`;
+    const co = it.composition || {};
+    const fn = it.function || {};
+    const sf = it.safety || {};
+    const sfb = `<p>${riskBadge(sf.level)} ${esc(sf.reason || "")}</p>${sf.conditions ? `<p class="small"><b>Applies when:</b> ${esc(sf.conditions)}</p>` : ""}
+      ${(sf.hazards || []).length ? `<h3>Hazards</h3>${list(A, sf.hazards)}` : ""}${(sf.precautions || []).length ? `<h3>Precautions</h3>${list(A, sf.precautions)}` : ""}${(sf.warning_signs || []).length ? `<h3>Warning signs — get help</h3>${list(A, sf.warning_signs)}` : ""}
+      <p class="small muted">Risk labels are UIX communication aids, not official hazard classifications or professional assessments. For a real product, the manufacturer's Safety Data Sheet and label govern.</p>`;
+    h += `<div class="card item" id="${A.id}-item-${ii}"><h2>${esc(it.name)} ${riskBadge(sf.level || "Unknown")}</h2>
+      ${sec("1 · Identification", idb, true)}${sec("2 · What it looks like", apb, false)}
+      ${sec("3 · " + esc(co.heading || "Composition or cause"), list(A, co.points), A.input.detail === "detailed")}
+      ${sec("4 · Function &amp; significance", (fn.plain ? `<p>${esc(fn.plain)} ${cites(A, fn.sources)}</p>` : "") + (fn.technical ? `<p class="small">${esc(fn.technical)}</p>` : ""), A.input.detail === "detailed")}
+      ${sec("5 · Safety &amp; risk", sfb, true)}</div>`;
+  });
+  const I = R.interactions || {};
+  if (I.applicable || (I.pairs || []).length || I.equation) {
+    const b = `${I.summary ? `<p>${esc(I.summary)}</p>` : ""}${I.equation ? `<p><b>Equation:</b> <span class="mono">${esc(I.equation)}</span></p>` : ""}${I.equationCheck ? `<p class="small ${/could not/.test(I.equationCheck) ? "warnc" : "okc"}">${esc(I.equationCheck)}</p>` : ""}
+      ${(I.pairs || []).length ? `<table class="t"><thead><tr><th>Between</th><th>Type</th><th>What happens</th><th>Hazard</th></tr></thead><tbody>${I.pairs.map(p => `<tr><td>${esc((p.between || []).join(" + "))}</td><td>${esc(p.type)}</td><td>${pt(A, { text: p.description, sources: p.sources, basis: p.basis })}${p.conditions ? `<div class="small muted">Conditions: ${esc(p.conditions)}</div>` : ""}</td><td>${riskBadge(p.hazard)}</td></tr>`).join("")}</tbody></table>` : ""}`;
+    h += `<div class="card">${sec("6 · Interactions &amp; relationships", b, true)}</div>`;
+  }
+  if ((R.answers || []).length || (R.calculations || []).length) {
+    let b = (R.answers || []).map(a => `<h3>${esc(a.question)}</h3><p>${esc(a.answer)} ${cites(A, a.sources)}</p>`).join("");
+    b += (R.calculations || []).map(c => `<h3>${esc(c.title)}</h3><ol class="tight mono">${(c.steps || []).map(s => `<li>${esc(s)}</li>`).join("")}</ol><p><b>Result:</b> ${esc(c.result)}</p>`).join("");
+    h += `<div class="card">${sec("Your questions &amp; calculations", b, true)}</div>`;
+  }
+  const E = R.evidence || {};
+  const srcs = `<ol class="srclist">${A.sources.map(s => `<li id="${A.id}-${s.id}"><b>[${s.id}]</b> ${PROV[s.provenance] || ""}${s.lowAuthority ? ' <span class="badge b-inf">community-edited</span>' : ""} ${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : esc(s.title)}
+     <div class="small muted">${s.provenance === "local" ? "Built into this app" : "Retrieved " + esc(fmtDate(s.retrieved))}${s.provenance === "cached" ? " (from cache — original retrieval time)" : ""}</div>
+     <details><summary class="small">What this record says</summary><dl class="kv small">${Object.entries(s.facts || {}).filter(([k, v]) => v !== "" && v != null).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>${s.text ? `<p class="small">${esc(s.text)}</p>` : ""}</details></li>`).join("")}</ol>`;
+  const unav = A.unavailable.filter(u => !u.notFound);
+  const nf = A.unavailable.filter(u => u.notFound);
+  const evb = `${(E.verified || []).length ? `<h3>Verified by sources</h3>${list(A, E.verified)}` : ""}${(E.inferred || []).length ? `<h3>Inferred (not directly verified)</h3>${list(A, E.inferred)}` : ""}
+    ${(E.uncertain || []).length ? `<h3>Uncertain</h3>${list(A, E.uncertain)}` : ""}${(E.conflicts || []).length ? `<h3>Conflicting evidence</h3>${list(A, E.conflicts)}` : ""}${(E.missing || []).length ? `<h3>Missing information</h3>${list(A, E.missing)}` : ""}
+    <h3>Sources used</h3>${A.sources.length ? srcs : "<p>No records were retrieved.</p>"}
+    ${unav.length ? `<h3>Sources that could not be reached</h3><ul class="tight">${unav.map(u => `<li class="badc">${esc(u.connector)} — “${esc(u.item)}”: ${esc(u.error)}</li>`).join("")}</ul><p class="small muted">Information those sources would have provided is missing from this report; it was not filled in from elsewhere.</p>` : ""}
+    ${nf.length ? `<details><summary class="small">Searched with no matching record (${nf.length})</summary><ul class="tight small">${nf.map(u => `<li>${esc(u.connector)} — “${esc(u.item)}”</li>`).join("")}</ul></details>` : ""}
+    ${A.links.length ? `<h3>Further reference (links only — not retrieved)</h3><ul class="tight small">${A.links.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title)}</a></li>`).join("")}</ul>` : ""}
+    ${R._validation && R._validation.removedCitations.length ? `<p class="small warnc">Removed ${R._validation.removedCitations.length} citation(s) that did not match a retrieved source: ${esc(R._validation.removedCitations.join(", "))}.</p>` : ""}
+    <p class="small muted">${PROV.live} fetched from the source's API · ${PROV.web} cited page found by live web search · ${PROV.local} stored in this app · ${BASIS.general} / ${BASIS.inference} written by the AI without a retrieved source.</p>`;
+  h += `<div class="card">${sec("7 · Verification &amp; evidence", evb, A.input.focus === "evidence")}</div>`;
+  if ((R.next_steps || []).length) h += `<div class="card">${sec("8 · Practical next steps", list(A, R.next_steps), true)}</div>`;
+  h += `<p class="small muted" style="text-align:center">General educational information — not a diagnosis, not medical, legal or safety certification. UIX ${UIX_VERSION}</p>`;
+  el.innerHTML = h;
+  el.onclick = async ev => {
+    const b = ev.target.closest("button"); if (!b) return;
+    if (b.dataset.act) exportAnalysis(A, b.dataset.act, el);
+    if (b.dataset.diagram != null) {
+      const i = +b.dataset.diagram; b.disabled = true; b.textContent = "Drawing…";
+      try { const src = await aiDiagram(A, R.items[i]); A.diagrams = A.diagrams || {}; A.diagrams[i] = src; $("#" + A.id + "-diag-" + i).innerHTML = `<figure class="ref" style="max-width:100%;margin-top:8px"><img src="${src}" alt="AI-generated diagram" style="max-height:none"><figcaption><b>AI-generated illustration</b> — a schematic drawn by the AI to explain the concept. It is not a photograph and is not evidence.</figcaption></figure>`; b.textContent = "Regenerate diagram"; }
+      catch (e) { toast("Diagram failed: " + e.message); b.textContent = "Generate explanatory diagram (AI)"; }
+      b.disabled = false;
+    }
+  };
+}
+
+/* ---------------- export ---------------- */
+function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+function exportAnalysis(A, kind, el) {
+  const base = "UIX-" + (A.report.title || "report").replace(/[^\w-]+/g, "_").slice(0, 40);
+  if (kind === "print") { $$("details", el).forEach(d => d.open = true); window.print(); return; }
+  if (kind === "json") { const c = JSON.parse(JSON.stringify(A)); delete c.imagesPreview; return download(base + ".json", JSON.stringify(c, null, 2), "application/json"); }
+  if (kind === "html") { $$("details", el).forEach(d => d.open = true); const css = $("style").textContent; return download(base + ".html", `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(A.report.title)}</title><style>${css}</style></head><body><main>${el.innerHTML}</main></body></html>`, "text/html"); }
+  const R = A.report; const c = a => (a || []).length ? " [" + a.join("][") + "]" : "";
+  const L = a => (a || []).map(x => "- " + (typeof x === "string" ? x : x.text + c(x.sources))).join("\n");
+  let m = `# ${R.title}\n\n_${fmtDate(A.created)} · ${A.mode === "ai" ? "AI report + live sources" : "Retrieval-only"}_\n\n**Input:** ${A.input.text || "(photos)"}\n\n${R.overview}\n\n`;
+  (R.items || []).forEach(it => { m += `## ${it.name}\n\n**Confidence:** ${it.confidence.level} — ${it.confidence.basis}\n\n${it.summary || ""}\n\n`;
+    if ((it.identifiers || []).length) m += it.identifiers.map(x => `- ${x.label}: ${x.value}${c(x.sources)}`).join("\n") + "\n\n";
+    if (it.appearance && it.appearance.description) m += `### Appearance\n${it.appearance.description}\n${L(it.appearance.features)}\n\n`;
+    if (it.composition && (it.composition.points || []).length) m += `### ${it.composition.heading || "Composition"}\n${L(it.composition.points)}\n\n`;
+    if (it.function && it.function.plain) m += `### Function\n${it.function.plain}\n\n`;
+    m += `### Safety: ${it.safety.level}\n${it.safety.reason || ""}\n${L(it.safety.hazards)}\n${L(it.safety.precautions)}\n\n`; });
+  const I = R.interactions || {}; if (I.equation || (I.pairs || []).length) m += `## Interactions\n${I.summary || ""}\n${I.equation ? "\nEquation: " + I.equation + "\n" : ""}${(I.pairs || []).map(p => `- ${(p.between || []).join(" + ")} (${p.type}, hazard ${p.hazard}): ${p.description}${c(p.sources)}`).join("\n")}\n\n`;
+  (R.answers || []).forEach(a => m += `### ${a.question}\n${a.answer}${c(a.sources)}\n\n`);
+  if ((R.next_steps || []).length) m += `## Next steps\n${L(R.next_steps)}\n\n`;
+  m += `## Sources\n` + A.sources.map(s => `- [${s.id}] ${s.title} — ${s.url || "built-in data"} (${s.provenance}, ${s.retrieved})`).join("\n") + "\n";
+  if (A.unavailable.filter(u => !u.notFound).length) m += `\n## Unavailable sources\n` + A.unavailable.filter(u => !u.notFound).map(u => `- ${u.connector} (${u.item}): ${u.error}`).join("\n") + "\n";
+  (A.thread || []).forEach(t => m += `\n**${t.role === "user" ? "Question" : "Answer"}:** ${t.text}\n`);
+  download(base + ".md", m, "text/markdown");
+}
+
+/* ---------------- history ---------------- */
+function histLoad() { let h = store.get("uix_history", []); if (S.hist === "off") return []; if (S.hist !== "forever") { const cut = Date.now() - Number(S.hist) * 864e5; h = h.filter(a => new Date(a.created).getTime() > cut); } return h; }
+function histSave(A) {
+  if (S.hist === "off") return;
+  const c = JSON.parse(JSON.stringify(A)); if (S.himg !== "yes") { c.imagesPreview = []; c.diagrams = {}; }
+  let h = histLoad().filter(x => x.id !== A.id); h.unshift(c);
+  while (h.length && !store.set("uix_history", h.slice(0, 200))) h.pop();
+  renderHistory();
+}
+function renderHistory() {
+  const q = ($("#hSearch").value || "").toLowerCase(); const h = histLoad();
+  $("#hNote").textContent = S.hist === "off" ? "History is turned off in Settings." : h.length + " saved analysis(es). Stored only in this browser.";
+  $("#hList").innerHTML = h.filter(a => !q || JSON.stringify([a.input.text, a.report && a.report.title]).toLowerCase().includes(q)).map(a => `<div class="row" style="border-bottom:1px solid var(--line);padding:8px 0;align-items:center"><div style="flex:3 1 260px"><b>${esc(a.report ? a.report.title : a.input.text)}</b><div class="small muted">${esc(fmtDate(a.created))} · ${a.sources.length} sources · ${(a.thread || []).length / 2 | 0} follow-up(s)</div></div><div style="flex:0 0 auto"><button class="btn sm" data-open="${a.id}">Open</button> <button class="btn sm" data-del="${a.id}">Delete</button></div></div>`).join("") || "<p class='muted'>Nothing here yet.</p>";
+}
+function openAnalysis(A) { current = A; showView("explore"); $("#emergBox").innerHTML = ""; if (A.emergency) showEmergency(); $("#stepsCard").classList.add("hide"); renderAnalysis(A); renderThread(); $("#followCard").classList.remove("hide"); window.scrollTo(0, $("#report").offsetTop - 70); }
+
+/* ---------------- follow-ups ---------------- */
+function renderThread() { const A = current; if (!A) return; $("#thread").innerHTML = (A.thread || []).map(m => `<div class="msg ${m.role === "user" ? "u" : "a"}">${m.role === "user" ? esc(m.text) : richText(A, m.text)}</div>`).join(""); }
+async function askFollowUp() {
+  const q = $("#fq").value.trim(); if (!q || !current) return;
+  if (q.length > 3000) return toast("Question is too long");
+  if (!aiReady()) return toast("Follow-up questions need your API key (Settings)");
+  if (detectEmergency(q)) showEmergency();
+  $("#fgo").disabled = true; current.thread.push({ role: "user", text: q }); $("#fq").value = ""; renderThread();
+  $("#thread").insertAdjacentHTML("beforeend", `<div class="msg a muted" id="thinking">Researching…</div>`);
+  try { const r = await aiFollowUp(current, q); current.thread.push({ role: "assistant", text: r.text || "(no answer returned)" }); if (r.added) renderAnalysis(current); }
+  catch (e) { current.thread.push({ role: "assistant", text: "I couldn't answer that: " + e.message }); }
+  $("#fgo").disabled = false; renderThread(); histSave(current);
+}
+
+/* ---------------- periodic table ---------------- */
+let PT_LIVE = null;
+function renderPT() {
+  const q = ($("#ptSearch").value || "").trim().toLowerCase(); const cat = $("#ptCat").value;
+  const cells = [];
+  ELEMENTS.forEach(e => {
+    let row = e.period, col = e.group;
+    if (e.cls === "l") { row = 9; col = e.z - 57 + 3; } if (e.cls === "c") { row = 10; col = e.z - 89 + 3; }
+    const match = (!q || e.name.toLowerCase().includes(q) || e.sym.toLowerCase() === q || String(e.z) === q) && (!cat || e.cls === cat);
+    cells.push(`<div class="el ${CLASS_CSS[e.cls]} ${match ? "" : "dim"}" style="grid-row:${row};grid-column:${col}" data-z="${e.z}" title="${esc(e.name)}"><span>${e.z}</span><b>${e.sym}</b>${esc(e.name)}</div>`);
+  });
+  cells.push(`<div class="el c-lan" style="grid-row:6;grid-column:3;cursor:default"><b>57–71</b></div><div class="el c-act" style="grid-row:7;grid-column:3;cursor:default"><b>89–103</b></div><div style="grid-row:8;grid-column:1/19;height:8px"></div>`);
+  $("#pt").innerHTML = cells.join("");
+}
+function showElement(z) {
+  const e = ELEMENTS[z - 1]; const live = PT_LIVE && PT_LIVE.find(r => +r.AtomicNumber === z);
+  const extra = live ? ["ElectronConfiguration", "Electronegativity", "AtomicRadius", "IonizationEnergy", "OxidationStates", "StandardState", "MeltingPoint", "BoilingPoint", "Density", "YearDiscovered"].filter(k => live[k]).map(k => `<dt>${esc(k.replace(/([A-Z])/g, " $1").trim())}</dt><dd>${esc(live[k])}${{ MeltingPoint: " K", BoilingPoint: " K", Density: " g/cm³", AtomicRadius: " pm", IonizationEnergy: " eV" }[k] || ""}</dd>`).join("") : "";
+  $("#elCard").classList.remove("hide");
+  $("#elCard").innerHTML = `<h2>${e.name} (${e.sym}) — ${e.z}</h2><dl class="kv"><dt>${e.massIsIsotope ? "Mass number, longest-lived isotope" : "Standard atomic weight"}</dt><dd>${e.massText}</dd><dt>Group / period</dt><dd>${e.group || "f-block"} / ${e.period}</dd><dt>Block</dt><dd>${e.block}</dd><dt>Class</dt><dd>${esc(e.className)}</dd><dt>Radioactive</dt><dd>${e.radioactive ? "Yes — no stable isotopes" : "No"}</dd>${extra}</dl>
+    <p class="small muted">${live ? 'Extra properties: <span class="badge b-live">Live</span> PubChem Periodic Table.' : "Load live PubChem data for configuration, density, melting/boiling points and discovery year."} <a href="https://pubchem.ncbi.nlm.nih.gov/element/${e.z}" target="_blank" rel="noopener">PubChem element page</a></p>
+    <button class="btn pri" id="elAnalyze">Full analysis in Explore (uses, hazards, reactivity, history)</button>`;
+  $("#elAnalyze").onclick = () => { showView("explore"); $("#q").value = e.name; $("#cat").value = "element"; startAnalysis(); };
+  $("#elCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* ---------------- settings ---------------- */
+function fillSelect(sel, opts, val) { sel.innerHTML = opts.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join(""); if (val) sel.value = val; }
+function loadSettingsUI() {
+  const map = { s_mode: "mode", s_model: "model", s_tokens: "tokens", s_proxy: "proxy", s_web: "web", s_webver: "webver", s_webmax: "webmax", s_ncbimail: "ncbimail", s_timeout: "timeout", s_rate: "rate", s_cache: "cache", s_hist: "hist", s_himg: "himg", s_defcat: "defcat", s_theme: "theme" };
+  Object.entries(map).forEach(([id, k]) => { const el = $("#" + id); if (el) el.value = S[k]; });
+  $("#s_key").value = secrets.anthropic; $("#s_wsid").value = secrets.wsid; $("#s_ncbikey").value = secrets.ncbi; $("#s_epakey").value = secrets.epa;
+  $("#proxyRow").classList.toggle("hide", S.mode !== "proxy"); $("#keyRow").classList.toggle("hide", S.mode === "proxy");
+  renderConnRows(); updateModeNote(); applyTheme();
+  loadSettingsUI.map = map;
+}
+function saveSettingsUI() {
+  Object.entries(loadSettingsUI.map).forEach(([id, k]) => { const el = $("#" + id); if (el) S[k] = ["tokens", "webmax", "timeout", "rate", "cache"].includes(k) ? Number(el.value) : el.value.trim(); });
+  if (S.proxy && !/^https:\/\//.test(S.proxy)) { toast("Proxy URL must start with https://"); S.proxy = ""; }
+  const k = $("#s_key").value.trim(); if (k && !/^sk-ant-[\w-]{20,}$/.test(k)) toast("That key doesn't look like an Anthropic key (sk-ant-…). Saved anyway.");
+  store.setRaw(SHARED_KEY_NAME, k); const ws = $("#s_wsid").value.trim(); if (ws && !/^wrkspc_[A-Za-z0-9]+$/.test(ws)) toast("Workspace ID should start with wrkspc_"); store.setRaw("anthropic_workspace_id", ws); store.setRaw("uix_ncbi_key", $("#s_ncbikey").value.trim()); store.setRaw("uix_epa_key", $("#s_epakey").value.trim());
+  saveS(); loadSettingsUI(); renderHistory(); $("#saveNote").textContent = "Saved " + new Date().toLocaleTimeString(); toast("Settings saved");
+}
+function renderConnRows() {
+  $("#connRows").innerHTML = CONNECTORS.map(c => { const t = S.connTest[c.id];
+    return `<tr><td><b>${esc(c.name)}</b>${c.needsKey ? ' <span class="small muted">(key required)</span>' : ""}${c.local ? ' <span class="badge b-local">Built-in</span>' : c.ai ? ' <span class="badge b-web">via AI</span>' : ' <span class="badge b-live">Live API</span>'}</td><td class="small">${esc(c.covers)}</td>
+      <td><label class="switch"><input type="checkbox" data-conn="${c.id}" ${connOn(c.id) ? "checked" : ""} ${c.local ? "disabled" : ""}></label></td><td><button class="btn sm" data-ctest="${c.id}">Test</button></td>
+      <td class="small" id="ct-${c.id}">${t ? `<span class="${t.ok ? "okc" : "badc"}">${t.ok ? "OK" : "Failed"}</span> ${esc(t.msg)}<div class="muted">${esc(fmtDate(t.at))}</div>` : '<span class="muted">not tested</span>'}</td></tr>`; }).join("");
+}
+async function testConnector(id) {
+  const c = CONN[id]; const cell = $("#ct-" + id); if (cell) cell.innerHTML = '<span class="muted">testing…</span>';
+  try { if (c.ai && !aiReady()) throw new Error("needs API key"); const msg = await c.test({}); S.connTest[id] = { ok: true, msg: String(msg), at: nowISO() }; }
+  catch (e) { S.connTest[id] = { ok: false, msg: e.message, at: nowISO() }; }
+  saveS(); renderConnRows(); return S.connTest[id];
+}
+function updateModeNote() {
+  $("#modeNote").innerHTML = aiReady() ? `Full analysis: ${esc($("#s_model").selectedOptions[0] ? $("#s_model").selectedOptions[0].text : S.model)} + live sources${S.web === "on" ? " + web research" : ""}.` : `<span class="warnc">Retrieval-only mode</span> — add your API key in Settings for photo analysis and full reports.`;
+}
+function applyTheme() { if (S.theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", S.theme); }
+
+/* ---------------- views ---------------- */
+function showView(v) { $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); $$(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v)); if (v === "history") renderHistory(); }
+
+async function startAnalysis() {
+  const text = $("#q").value.trim(); const imgs = pending.filter(p => !p.error && p.b64);
+  if (!text && !imgs.length) return toast(pending.length ? "The photo(s) could not be read — retry or remove them" : "Type something or add a photo");
+  if (text.length > 6000) return toast("Input is too long (6,000 characters max)");
+  if (!rateCheck()) return toast("Rate limit reached for this hour (change it in Settings)");
+  $("#go").disabled = true; $("#report").innerHTML = ""; $("#emergBox").innerHTML = ""; $("#followCard").classList.add("hide");
+  try {
+    const A = await runAnalysis({ text, category: $("#cat").value, detail: $("#detail").value, focus: $("#focus").value }, imgs);
+    current = A; renderAnalysis(A); renderThread(); $("#followCard").classList.toggle("hide", false); histSave(A);
+  } catch (e) { $("#report").innerHTML = `<div class="card"><h2 class="badc">Analysis stopped</h2><p>${esc(e.message)}</p><button class="btn" onclick="startAnalysis()">Retry</button></div>`; }
+  $("#go").disabled = false;
+}
+
+/* ---------------- self-tests ---------------- */
+const quietRun = (text, o = {}) => runAnalysis({ text, category: "auto", detail: "concise", focus: "all" }, o.images || [], Object.assign({ quiet: true }, o));
+const reportText = A => JSON.stringify(A.report || {}).toLowerCase();
+const TESTS = [
+  { n: 1, name: "Element identification — Fe", async run(off) { const A = await quietRun("Fe", { noAI: off }); const e = A.sources.find(s => s.connector === "elements"); const live = A.sources.find(s => s.connector === "pcperiodic");
+      const ok = e && e.facts["Atomic number"] === 26 && e.facts.Name === "Iron"; return { pass: ok && (off || reportText(A).includes("iron")), detail: ok ? "Iron, Z = 26, " + e.facts.Class + (live ? "; live PubChem configuration " + (live.facts["Electron Configuration"] || "") : "; live PubChem element data unavailable") : "element record missing" }; } },
+  { n: 2, name: "Chemical formula — H2O", async run(off) { const A = await quietRun("H2O", { noAI: off }); const p = A.sources.find(s => s.connector === "pubchem" && s.cid); const f = (A.engine.formulas || [])[0];
+      return { pass: !!p && p.facts["Molecular formula"] === "H2O" && /water/i.test(p.facts.Name) && f && Math.abs(f.molarMass - 18.015) < 0.01, detail: p ? `${p.facts.Name}, CID ${p.cid}, ${p.facts["Molecular formula"]}; engine molar mass ${f && f.molarMass} g/mol` : "PubChem record not retrieved: " + JSON.stringify(A.unavailable) }; } },
+  { n: 3, name: "Reaction analysis — H2 + O2", async run(off) { const b = balanceEquation(["H2", "O2"], ["H2O"]); const A = await quietRun("H2 + O2", { noAI: off }); const eqOk = b.ok && b.equation === "2 H2 + O2 → 2 H2O";
+      if (off) return { pass: eqOk && !!A.engine.equation && !A.engine.equation.products.length, detail: "Engine: balancer gives “" + b.equation + "”; for H2 + O2 alone it refuses to invent products (AI step adds the established product and conditions)." };
+      const I = A.report.interactions || {}; const t = reportText(A); return { pass: eqOk && /2\s*h2\s*\+\s*o2\s*(→|->)\s*2\s*h2o/i.test(I.equation || "") && /(ignit|spark|flame|catalys|activation)/.test(t), detail: "Report equation: " + (I.equation || "none") + ". " + (I.equationCheck || "") }; } },
+  { n: 4, name: "Disease research — COVID-19", ai: true, async run() { const A = await quietRun("COVID-19"); const t = reportText(A); const med = A.sources.filter(s => ["medlineplus", "pubmed", "web"].includes(s.connector));
+      return { pass: t.includes("sars-cov-2") && med.length > 0 && /symptom/.test(t) && /(vaccin|prevent)/.test(t), detail: med.length + " medical source(s): " + med.slice(0, 3).map(s => s.title).join("; ") }; } },
+  { n: 5, name: "Image — labeled product", ai: true, img: "t5img", async run(off, img) { if (!img) return { pass: null, detail: "Choose a Test 5 photo above, then run again." }; const A = await quietRun("What is this product and what are its hazards?", { images: [img] }); const r = (A.plan.image_reads || [])[0] || {};
+      return { pass: !!(r.visible_text && r.visible_text.length > 3) && A.sources.length > 0, detail: "Label text read: “" + trunc(r.visible_text || "", 120) + "”; " + A.sources.length + " source record(s)." }; } },
+  { n: 6, name: "Ambiguous image — unknown powder", ai: true, img: "t6img", async run(off, img) { if (!img) return { pass: null, detail: "Choose a Test 6 photo above, then run again." }; const A = await quietRun("What is this powder?", { images: [img] }); const its = A.report.items || [];
+      const ok = its.length && its.every(i => !["Confirmed", "High"].includes(i.confidence.level)) && (A.report.next_steps || []).length > 0; return { pass: !!ok, detail: its.map(i => i.name + ": " + i.confidence.level).join("; ") }; } },
+  { n: 7, name: "Multiple items — water, ethanol, sodium chloride", async run(off) { const A = await quietRun("water, ethanol, and sodium chloride", { noAI: off }); const p = A.sources.filter(s => s.connector === "pubchem" && s.cid).map(s => s.facts.Name.toLowerCase());
+      const all3 = ["water", "ethanol", "sodium chloride"].every(n => p.some(x => x.includes(n)));
+      if (off) return { pass: all3, detail: "PubChem records: " + p.join(", ") };
+      const bad = ((A.report.interactions || {}).pairs || []).filter(x => /reaction/.test(x.type) && ["High", "Critical"].includes(x.hazard));
+      return { pass: all3 && (A.report.items || []).length >= 3 && !bad.length, detail: "Items: " + (A.report.items || []).map(i => i.name).join(", ") + (bad.length ? " — flagged a hazardous reaction (unexpected)" : "; no hazardous reaction assumed") }; } },
+  { n: 8, name: "Multiple questions in one request", ai: true, async run() { const A = await quietRun("Sodium hypochlorite: what is it, what does it look like, what is it made of, what are its hazards, what is it used for, and give references."); const i = (A.report.items || [])[0] || {};
+      const ok = i.appearance && i.appearance.description && (i.composition.points || []).length && (i.safety.hazards || []).length && i.function && i.function.plain && A.sources.length; return { pass: !!ok, detail: `identity ✓ appearance ${i.appearance && i.appearance.description ? "✓" : "✗"} composition ${(i.composition || {}).points ? "✓" : "✗"} hazards ${((i.safety || {}).hazards || []).length} uses ${i.function && i.function.plain ? "✓" : "✗"} sources ${A.sources.length}` }; } },
+  { n: 9, name: "Missing data — invalid identifier 1234-56-7", async run(off) { const A = await quietRun("1234-56-7", { noAI: off }); const hit = A.sources.some(s => s.connector === "pubchem" && s.cid); const it = (A.report.items || [])[0] || {};
+      return { pass: !hit && (A.engine.invalidIds || []).length > 0 && ["Not identified", "Low"].includes(it.confidence && it.confidence.level), detail: (A.engine.invalidIds || [""])[0] + " Confidence: " + (it.confidence && it.confidence.level) }; } },
+  { n: 10, name: "External service failure (PubChem forced offline)", async run(off) { const A = await quietRun("NaCl", { noAI: off, forceFail: ["pubchem"] }); const u = A.unavailable.find(x => /PubChem/.test(x.connector) && !x.notFound);
+      return { pass: !!u && !A.sources.some(s => s.connector === "pubchem"), detail: u ? "Reported honestly: " + u.connector + " — " + u.error : "failure was not reported" }; } },
+  { n: 11, name: "Corrupted image is rejected", async run() { const bytes = new Uint8Array(2048); crypto.getRandomValues(bytes); const f = new File([bytes], "broken.png", { type: "image/png" });
+      try { await prepareImage(f); return { pass: false, detail: "corrupted file was accepted" }; } catch (e) { return { pass: true, detail: "Rejected with message: “" + e.message + "” — user can remove or retry." }; } } },
+  { n: 12, name: "Security checks", async run() {
+      const k = secrets.anthropic; const html = document.documentElement.outerHTML;
+      const leak = k && html.includes(k);
+      const box = document.createElement("div"); const fake = { id: "x", created: nowISO(), input: { text: "<img src=x onerror=alert(1)>", imageNames: [] }, imagesPreview: [], plan: { items: [] }, sources: [], unavailable: [], links: [], thread: [], report: { title: "<scr" + "ipt>alert(1)</scr" + "ipt>", overview: "<img src=x onerror=alert(1)>", items: [{ name: "<b>x</b>", confidence: { level: "Low", basis: "" }, safety: { level: "Unknown" } }] } };
+      renderAnalysis(fake, box); const xss = box.querySelector("script") || box.querySelector("img[onerror]");
+      const ext = $$("script[src]").length;
+      return { pass: !leak && !xss && !ext, detail: `Key in page markup: ${leak ? "YES" : "no"} · XSS probe: ${xss ? "FAILED" : "escaped"} · external scripts: ${ext} · input limits & rate limit on · Key storage: ${S.mode === "proxy" ? "on your proxy server (not in this browser)" : "this browser only (Direct mode) — use Proxy mode to keep it server-side"}` }; } }
+];
+async function runTests(offlineOnly) {
+  const tb = $("#testRows"); const off = offlineOnly || !aiReady();
+  tb.innerHTML = TESTS.map(t => `<tr id="tr-${t.n}"><td>${t.n}</td><td>${esc(t.name)}${t.ai ? ' <span class="badge b-ai">AI</span>' : ""}</td><td class="muted">waiting</td><td></td></tr>`).join("");
+  let pass = 0, fail = 0, skip = 0;
+  for (const t of TESTS) {
+    const row = $("#tr-" + t.n);
+    if (t.ai && off) { row.cells[2].innerHTML = '<span class="muted">skipped</span>'; row.cells[3].textContent = offlineOnly ? "Needs the AI service." : "Add your API key in Settings to run this test."; skip++; continue; }
+    row.cells[2].innerHTML = '<span class="muted">running…</span>';
+    let img = null; if (t.img) { const f = $("#" + t.img).files[0]; if (f) { try { img = await prepareImage(f); } catch (e) { row.cells[2].innerHTML = '<span class="badc">FAIL</span>'; row.cells[3].textContent = "Photo unreadable: " + e.message; fail++; continue; } } }
+    try { const r = await t.run(off, img); row.cells[2].innerHTML = r.pass === null ? '<span class="muted">needs photo</span>' : r.pass ? '<span class="okc">PASS</span>' : '<span class="badc">FAIL</span>'; row.cells[3].textContent = r.detail; r.pass === null ? skip++ : r.pass ? pass++ : fail++; }
+    catch (e) { row.cells[2].innerHTML = '<span class="badc">FAIL</span>'; row.cells[3].textContent = "Error: " + e.message; fail++; }
+    $("#testSummary").textContent = `${pass} passed · ${fail} failed · ${skip} skipped`;
+  }
+  store.set("uix_lasttests", { at: nowISO(), pass, fail, skip });
+}
+
+/* ---------------- guide ---------------- */
+function renderGuide() {
+  $("#guideBody").innerHTML = `<h2>Guide — setup, sources and limits</h2>
+<p>UIX is a single file. Everything — the app, the periodic table, Settings, the self-tests and this guide — lives in <span class="mono">UIX.html</span>. You are the only user; there are no logins.</p>
+<h3>1. Put it online (recommended)</h3>
+<p>Upload <span class="mono">UIX.html</span> to your GitHub Pages repository (the same site as your other tools) and open it from its <span class="mono">https://…github.io/…</span> link. Some sources refuse requests from a file opened straight from your Downloads folder, so the hosted link is the reliable way. On the same GitHub Pages site, UIX reads the same saved Anthropic key as your other tools.</p>
+<h3>2. Settings</h3>
+<ul class="tight"><li><b>Anthropic API key</b> — turns on photo analysis, the full report, web research, follow-ups and diagrams. Without it UIX still works in <i>retrieval-only</i> mode: it shows raw records from the databases and nothing else.</li>
+<li><b>Workspace ID</b> — leave blank if you chose a workspace when you created the key. If the AI test says a workspace ID is required, copy it from the Claude Console (Settings → Workspaces) and paste it here.</li>
+<li><b>NCBI key + email</b> (optional) — free from your NCBI account; raises PubMed limits.</li>
+<li><b>EPA CompTox key</b> (optional) — free by emailing the EPA (ccte_api@epa.gov). Until then that connector stays off and the report links to the Dashboard instead.</li>
+<li><b>Data connectors</b> — turn each source on/off and press <i>Test</i>. <b>Test all connectors</b> after setup.</li></ul>
+<h3>3. How an analysis works</h3>
+<ol class="tight"><li>Emergency words are checked first; if found, help numbers appear immediately.</li><li>The AI reads your text and photos (real vision — the file name is never used) and splits the request into subjects.</li><li>The built-in chemistry engine does exact math: formula parsing, molar mass, CAS check digits, equation balancing. It never invents reaction products.</li><li>Each subject is looked up in the matching live databases. Every record keeps its link and retrieval time.</li><li>For current guidance (CDC, WHO, NIH, FDA, EPA, ECHA, NIST…), live web search runs and only pages it actually cited become sources.</li><li>The AI writes the report using only those numbered sources; citations that don't match a real source are removed and counted. Each statement is tagged as sourced, general knowledge, or inference.</li><li>Ask follow-ups underneath; new web sources are added to the same list.</li></ol>
+<h3>4. Where each requested source stands</h3>
+<table class="t"><thead><tr><th>Source</th><th>How UIX uses it</th></tr></thead><tbody>
+<tr><td>PubChem, PubChem Periodic Table, PubMed, ClinicalTrials.gov, openFDA, Free Dictionary (Wiktionary), Wikipedia</td><td><span class="badge b-live">Live API</span> queried directly, no key needed</td></tr>
+<tr><td>MedlinePlus</td><td>Its search service blocks browser pages, so UIX uses a backup: NLM Clinical Tables (live) finds the official MedlinePlus topic and link, and live web search restricted to medlineplus.gov retrieves the text with citations (needs API key)</td></tr>
+<tr><td>DailyMed</td><td>Its API blocks browser pages, so UIX lists the same FDA labels (same set IDs) through openFDA and links each one to its DailyMed page</td></tr>
+<tr><td>EPA CompTox</td><td><span class="badge b-live">Live API</span> once you add the free key</td></tr>
+<tr><td>CDC, WHO, NIH, FDA guidance, ECHA, NIST, OSHA/NIOSH, NASA, USGS, NOAA, Poison Control</td><td><span class="badge b-web">Web research</span> — they have no open data API for this; found and cited through live web search</td></tr>
+<tr><td>NIST Chemistry WebBook, ECHA search, Orphanet, CompTox search</td><td>Also shown as <i>links only — not retrieved</i> so you can open the official record</td></tr>
+<tr><td>ChemSpider</td><td>Not connected — it requires a Royal Society of Chemistry developer account and key. PubChem covers the same identifiers.</td></tr>
+<tr><td>Official Safety Data Sheets</td><td>Found via web research when a manufacturer posts one publicly; PubChem GHS classifications are retrieved live</td></tr></tbody></table>
+<h3>5. Server-side key (Proxy mode)</h3>
+<p>In Direct mode your key is saved only in this browser on this device — fine for a personal tool, but it is not “server-side.” To keep the key off the device entirely, create a free Cloudflare Worker with the code below, add two variables in the Worker settings — <span class="mono">ANTHROPIC_API_KEY</span> (secret) and <span class="mono">ALLOWED_ORIGIN</span> (your <span class="mono">https://yourname.github.io</span>) — then choose <b>Proxy</b> in Settings and paste the Worker URL.</p>
+<pre>export default {
+  async fetch(req, env) {
+    const cors = { "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN,
+      "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "content-type" };
+    if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+    if (req.method !== "POST" || req.headers.get("Origin") !== env.ALLOWED_ORIGIN)
+      return new Response("Forbidden", { status: 403, headers: cors });
+    const body = await req.text();
+    if (body.length > 12e6) return new Response("Too large", { status: 413, headers: cors });
+    const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY,
+                 "anthropic-version": "2023-06-01" }, body });
+    return new Response(r.body, { status: r.status, headers: { ...cors, "content-type": "application/json" } });
+  }
+};</pre>
+<p class="small muted">The origin check stops other websites from using your Worker through a browser; add Cloudflare's rate-limiting rule for extra protection.</p>
+<h3>6. Privacy</h3><p>Photos are sent only to the AI service for the analysis you run. History stays in this browser, follows the retention you choose, and stores photos only if you turn that on. Nothing is sent to any other server.</p>
+<h3>7. Self-Tests</h3><p>The Self-Tests tab runs the 12 acceptance tests against the live sources. Tests 5 and 6 need you to choose a photo. Test 10 deliberately breaks PubChem to prove failures are reported, not hidden.</p>
+<h3>8. Limits you should know</h3><ul class="tight"><li>UIX gives general educational information. It does not diagnose, prescribe, or certify anything as safe.</li><li>A photo can't prove what a substance is, how pure it is, or whether it's safe.</li><li>PubMed results show titles and metadata, not full abstracts.</li><li>If a source is down, the report says so and leaves that gap empty.</li></ul>`;
+}
+
+/* ---------------- wiring ---------------- */
+function init() {
+  fillSelect($("#cat"), CATEGORIES, S.defcat); fillSelect($("#s_defcat"), CATEGORIES, S.defcat);
+  fillSelect($("#ptCat"), [["", "All categories"], ...Object.entries(CLASS_NAMES)], "");
+  loadSettingsUI(); renderPT(); renderGuide(); renderHistory();
+  $("#tabs").onclick = e => { const b = e.target.closest("button"); if (b) showView(b.dataset.v); };
+  $("#go").onclick = startAnalysis; $("#q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) startAnalysis(); });
+  $("#clearBtn").onclick = () => { $("#q").value = ""; pending = []; renderThumbs(); $("#report").innerHTML = ""; $("#emergBox").innerHTML = ""; $("#stepsCard").classList.add("hide"); $("#followCard").classList.add("hide"); current = null; };
+  const drop = $("#drop"), file = $("#file");
+  drop.onclick = () => file.click(); drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") file.click(); };
+  file.onchange = () => { addFiles(file.files); file.value = ""; };
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); }; drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); };
+  document.addEventListener("paste", e => { const fs = Array.from(e.clipboardData && e.clipboardData.files || []).filter(f => /^image\//.test(f.type)); if (fs.length) addFiles(fs); });
+  $("#thumbs").onclick = async e => { const x = e.target.closest("[data-i]"), r = e.target.closest("[data-retry]");
+    if (x) { pending.splice(+x.dataset.i, 1); renderThumbs(); }
+    if (r) { const p = pending[+r.dataset.retry]; p.error = ""; renderThumbs(); try { Object.assign(p, await prepareImage(p.file)); } catch (er) { p.error = er.message; } renderThumbs(); } };
+  $("#fgo").onclick = askFollowUp; $("#fq").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); askFollowUp(); } });
+  $("#ptSearch").oninput = renderPT; $("#ptCat").onchange = renderPT;
+  $("#pt").onclick = e => { const c = e.target.closest("[data-z]"); if (c) showElement(+c.dataset.z); };
+  $("#ptLive").onclick = async () => { $("#ptStatus").textContent = "Loading live data from PubChem…"; try { PT_LIVE = await pubchemTable({}); $("#ptStatus").innerHTML = 'Live PubChem data loaded for ' + PT_LIVE.length + ' elements <span class="badge b-live">Live</span> — tap any element.'; } catch (e) { $("#ptStatus").innerHTML = '<span class="badc">PubChem could not be reached (' + esc(e.message) + ').</span> Built-in data is still shown.'; } };
+  $("#hSearch").oninput = renderHistory;
+  $("#hList").onclick = e => { const o = e.target.closest("[data-open]"), d = e.target.closest("[data-del]");
+    if (o) { const a = histLoad().find(x => x.id === o.dataset.open); if (a) openAnalysis(a); }
+    if (d && confirm("Delete this analysis from history?")) { store.set("uix_history", histLoad().filter(x => x.id !== d.dataset.del)); renderHistory(); } };
+  $("#hClear").onclick = () => { if (confirm("Delete ALL saved analyses? This cannot be undone.")) { store.del("uix_history"); renderHistory(); } };
+  $("#saveSettings").onclick = saveSettingsUI; $("#clearCache").onclick = () => { cache.clear(); toast("Cached records cleared"); };
+  $("#s_mode").onchange = () => { $("#proxyRow").classList.toggle("hide", $("#s_mode").value !== "proxy"); $("#keyRow").classList.toggle("hide", $("#s_mode").value === "proxy"); };
+  $("#s_theme").onchange = () => { S.theme = $("#s_theme").value; applyTheme(); };
+  $("#keyShow").onclick = () => { const k = $("#s_key"); k.type = k.type === "password" ? "text" : "password"; $("#keyShow").textContent = k.type === "password" ? "Show" : "Hide"; };
+  const aiTest = async () => { saveSettingsUI(); $("#aiStatus").textContent = "Testing…"; try { const r = await callClaude({ max_tokens: 20, messages: [{ role: "user", content: "Reply with the single word OK." }] }); $("#aiStatus").innerHTML = '<span class="okc">Connected</span> — ' + esc(S.model) + " replied “" + esc(textOf(r).trim()) + "”"; } catch (e) { $("#aiStatus").innerHTML = '<span class="badc">Failed</span> — ' + esc(e.message); } };
+  $("#keyTest").onclick = aiTest; $("#proxyTest").onclick = aiTest;
+  $("#connRows").onchange = e => { const c = e.target.closest("[data-conn]"); if (c) { S.conn[c.dataset.conn] = c.checked; saveS(); } };
+  $("#connRows").onclick = e => { const b = e.target.closest("[data-ctest]"); if (b) testConnector(b.dataset.ctest); };
+  $("#testAllConn").onclick = async () => { for (const c of CONNECTORS) await testConnector(c.id); toast("Connector tests finished"); };
+  $("#runTests").onclick = () => runTests(false); $("#runOffline").onclick = () => runTests(true);
+  if (location.protocol === "file:") toast("Tip: open UIX from your GitHub Pages link — some medical sources block files opened from Downloads.", 6000);
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body></html>
